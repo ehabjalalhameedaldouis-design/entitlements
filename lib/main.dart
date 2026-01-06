@@ -1,3 +1,4 @@
+import 'package:entitlements/mycolors.dart';
 import 'package:flutter/material.dart';
 import 'homepage.dart';
 
@@ -17,11 +18,12 @@ class _DebtManagerState extends State<DebtManager> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Color.fromARGB(255, 222, 169, 10),
+        // scaffoldBackgroundColor: MyColors.darkYellow,
+        primaryColor: MyColors.darkYellow,
         textSelectionTheme: TextSelectionThemeData(
-          selectionHandleColor: Color.fromARGB(255, 222, 169, 10),
-          cursorColor: Color.fromARGB(255, 222, 169, 10),
-          selectionColor: Color.fromARGB(255, 222, 169, 10).withValues(alpha: 0.5),
+          selectionHandleColor: MyColors.darkYellow,
+          cursorColor: MyColors.darkYellow,
+          selectionColor: MyColors.darkYellow.withValues(alpha: 0.5),
         ),
       ),
       home: Homepage(),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:entitlements/mycolors.dart';
 
 class MyTextField extends StatelessWidget {
-
   final String hintText;
   final IconData icon;
   const MyTextField({super.key, required this.hintText, required this.icon});
@@ -9,23 +9,20 @@ class MyTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      cursorColor: Color.fromARGB(255, 222, 169, 10),
-      style: TextStyle(color: Color.fromARGB(255, 222, 169, 10)),
+      cursorColor: MyColors.darkYellow,
+      style: TextStyle(color: MyColors.darkYellow),
       decoration: InputDecoration(
-        fillColor: const Color.fromARGB(255, 54, 44, 44),
+        fillColor: MyColors.lightBlack,
         filled: true,
-        suffixIcon: Icon(
-          icon,
-          color: Color.fromARGB(255, 222, 169, 10),
-        ),
+        suffixIcon: Icon(icon, color: MyColors.darkYellow),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color.fromARGB(255, 222, 169, 10)),
+          borderSide: BorderSide(color: MyColors.darkYellow),
           borderRadius: BorderRadius.circular(10),
         ),
         hintText: hintText,
-        hintStyle: TextStyle(color: Color.fromARGB(255, 222, 169, 10)),
-        focusColor: Color.fromARGB(255, 222, 169, 10),
+        hintStyle: TextStyle(color: MyColors.darkYellow),
+        focusColor: MyColors.darkYellow,
       ),
     );
   }
