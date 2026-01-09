@@ -4,35 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:entitlements/mytextfield.dart';
 
 
-class ReceivablesPage extends StatefulWidget {
-  const ReceivablesPage({super.key});
+class PayablesPage extends StatefulWidget {
+  const PayablesPage({super.key});
 
   @override
-  State<ReceivablesPage> createState() => _ReceivablesPageState();
+  State<PayablesPage> createState() => _PayablesPageState();
 }
 
-class _ReceivablesPageState extends State<ReceivablesPage> {
+class _PayablesPageState extends State<PayablesPage> {
 
-  List getReceivablesTransactions() {
-    List receivablesTransactions = [];
+  List getPayablesTransactions() {
+    List payablesTransactions = [];
     for (var person in myClients) {
       for (var transaction in person.transactions) {
-        if (transaction.isdebt) {
-          receivablesTransactions.add({"name": person.name, "data": transaction});
-        }
+        if (!transaction.isdebt) {
+            payablesTransactions.add({"name": person.name, "data": transaction});
+          }
       }
     }
-    receivablesTransactions.sort((a, b) => b['data'].time.compareTo(a['data'].time));
-    return receivablesTransactions.toList();
+    payablesTransactions.sort((a, b) => b['data'].time.compareTo(a['data'].time));
+    return payablesTransactions.toList();
   }
 
-  List get receivablesTran => getReceivablesTransactions();
+  List get payablesTran => getPayablesTransactions();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Receivables',
+          'Payables',
           style: TextStyle(
             color: const Color.fromARGB(255, 34, 33, 28),
             fontWeight: FontWeight.bold,
@@ -54,9 +54,9 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
             SizedBox(height: 30),
             Expanded(
               child: ListView.builder(
-                itemCount: receivablesTran.length,
+                itemCount: payablesTran.length,
                 itemBuilder: (context, index) {
-                  final tran = receivablesTran[index];
+                  final tran = payablesTran[index];
                   return Card(
                     color: MyColors.lightBlack,
                     elevation: 8,

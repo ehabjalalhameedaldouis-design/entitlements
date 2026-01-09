@@ -2,6 +2,7 @@
 import 'package:entitlements/mybuttom.dart';
 import 'package:entitlements/mytextfield.dart';
 import 'package:entitlements/fakedata.dart';
+import 'package:entitlements/payables.dart';
 import 'package:entitlements/receivablespage.dart';
 import 'package:flutter/material.dart';
 import 'package:entitlements/mycolors.dart';
@@ -75,13 +76,27 @@ class _HomepageState extends State<Homepage> {
                     text: 'RECEIVABLES',
                     icon: Icons.arrow_upward,
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ReceivablesPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReceivablesPage(),
+                        ),
+                      );
                     },
                   ),
                 ),
                 SizedBox(width: 10),
                 Expanded(
-                  child: MyButtom(text: 'PAYABLES', icon: Icons.arrow_downward),
+                  child: MyButtom(
+                    text: 'PAYABLES',
+                    icon: Icons.arrow_downward,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => PayablesPage()),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
