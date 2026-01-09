@@ -3,7 +3,6 @@ import 'package:entitlements/mycolors.dart';
 import 'package:flutter/material.dart';
 import 'package:entitlements/mytextfield.dart';
 
-
 class ReceivablesPage extends StatefulWidget {
   const ReceivablesPage({super.key});
 
@@ -12,17 +11,15 @@ class ReceivablesPage extends StatefulWidget {
 }
 
 class _ReceivablesPageState extends State<ReceivablesPage> {
-
   List getReceivablesTransactions() {
     List receivablesTransactions = [];
     for (var person in myClients) {
-      for (var transaction in person.transactions) {
-        if (transaction.isdebt) {
-          receivablesTransactions.add({"name": person.name, "data": transaction});
-        }
+      double balance = person.totalAmount;
+      if (balance > 0) {
+        receivablesTransactions.add({"name": person.name, "amount": balance});
       }
     }
-    receivablesTransactions.sort((a, b) => b['data'].time.compareTo(a['data'].time));
+    receivablesTransactions.sort((a, b) => b['amount'].compareTo(a['amount']));
     return receivablesTransactions.toList();
   }
 
@@ -58,18 +55,13 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
                 itemBuilder: (context, index) {
                   final tran = receivablesTran[index];
                   return Card(
-                    color: MyColors.lightBlack,
+                    color: const Color.fromARGB(255, 94, 201, 32),
                     elevation: 8,
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: ListTile(
-                        leading: Icon(
-                          tran["data"].isdebt
-                              ? Icons.remove_circle
-                              : Icons.add_circle,
-                          color: tran["data"].isdebt
-                              ? Colors.red
-                              : Colors.green,
+                        leading: Icon(Icons.add_circle,
+                          color: Colors.green,
                         ),
                         title: Text(
                           "${tran['name']}",
@@ -79,33 +71,33 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        subtitle: Text(
-                          "${tran['data'].description}",
-                          style: TextStyle(
-                            color: MyColors.darkYellow,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        // subtitle: Text(
+                        //   "${tran['data'].description}",
+                        //   style: TextStyle(
+                        //     color: MyColors.darkYellow,
+                        //     fontSize: 12,
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
                         trailing: Column(
                           children: [
                             SizedBox(height: 11),
                             Text(
-                              '${tran["data"].amount} EGP',
+                              '${tran["amount"]} EGP',
                               style: TextStyle(
                                 color: MyColors.darkYellow,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              '${tran['data'].time.day}/${tran['data'].time.month}/${tran['data'].time.year}',
-                              style: TextStyle(
-                                color: MyColors.darkYellow,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            // Text(
+                            //   '${tran['data'].time.day}/${tran['data'].time.month}/${tran['data'].time.year}',
+                            //   style: TextStyle(
+                            //     color: MyColors.darkYellow,
+                            //     fontSize: 12,
+                            //     fontWeight: FontWeight.bold,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -115,7 +107,7 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
               ),
             ),
           ],
-          ),
+        ),
       ),
     );
   }
