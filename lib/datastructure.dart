@@ -1,7 +1,15 @@
+import 'package:hive/hive.dart';
+part 'datastructure.g.dart';
+
+@HiveType(typeId: 0)
 class Transaction {
+  @HiveField(0)
   final double amount;
+  @HiveField(1)
   final DateTime time;
+  @HiveField(2)
   final String description;
+  @HiveField(3)
   final bool isdebt;
 
   Transaction({
@@ -12,8 +20,11 @@ class Transaction {
   });
 }
 
-class Person {
+@HiveType(typeId: 1)
+class Person extends HiveObject {
+  @HiveField(0)
   final String name;
+  @HiveField(1)
   final List<Transaction> transactions;
 
   Person({required this.name, required this.transactions});

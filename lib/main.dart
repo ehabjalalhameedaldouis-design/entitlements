@@ -1,8 +1,15 @@
 import 'package:entitlements/mycolors.dart';
 import 'package:flutter/material.dart';
 import 'homepage.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'datastructure.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(PersonAdapter());
+  Hive.registerAdapter(TransactionAdapter());
+  await Hive.openBox<Person>('clientsBox');
   runApp(const DebtManager());
 }
 
@@ -18,7 +25,10 @@ class _DebtManagerState extends State<DebtManager> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        // scaffoldBackgroundColor: MyColors.darkYellow,
+        appBarTheme: AppBarTheme(
+          backgroundColor: MyColors.background,
+        ),
+        scaffoldBackgroundColor: MyColors.background,
         primaryColor: MyColors.darkYellow,
         textSelectionTheme: TextSelectionThemeData(
           selectionHandleColor: MyColors.darkYellow,
