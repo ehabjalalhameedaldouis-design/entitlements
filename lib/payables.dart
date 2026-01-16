@@ -1,3 +1,4 @@
+import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 import 'package:entitlements/mycolors.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _PayablesPageState extends State<PayablesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Payables',
+          getword(context, 'payables'),
           style: TextStyle(
             color: MyColors.title,
             fontWeight: FontWeight.bold,
@@ -49,10 +50,13 @@ class _PayablesPageState extends State<PayablesPage> {
         child: Column(
           children: [
             SizedBox(height: 10),
-            MyTextField(hintText: 'Search', icon: Icons.search),
+            MyTextField(
+              hintText: getword(context, 'search'),
+              icon: Icons.search,
+            ),
             SizedBox(height: 30),
             if (payablesTran.isEmpty)
-              Center(child: Text('No payables found'))
+              Center(child: Text(getword(context, 'no_payables_found')))
             else
               Expanded(
                 child: ListView.builder(

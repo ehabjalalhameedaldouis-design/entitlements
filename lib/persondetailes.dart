@@ -1,3 +1,4 @@
+import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 import 'package:entitlements/mycolors.dart';
 import 'package:flutter/material.dart';
@@ -30,14 +31,14 @@ class _PersondetailesState extends State<Persondetailes> {
               return StatefulBuilder(
                 builder: (context, setState) {
                   return AlertDialog(
-                    title: Text("add a new transaction"),
+                    title: Text(getword(context, 'add_a_new_transaction')),
                     content: Column(
                       children: [
                         TextField(
                           controller: amountController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Enter amount",
+                            hintText: getword(context, 'enter_amount'),
                           ),
                         ),
                         SizedBox(height: 10),
@@ -45,12 +46,12 @@ class _PersondetailesState extends State<Persondetailes> {
                           controller: descriptionController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Enter description",
+                            hintText: getword(context, 'enter_description'),
                           ),
                         ),
                         SizedBox(height: 10),
                         SwitchListTile(
-                          title: Text("Is debt"),
+                          title: Text(getword(context, 'is_debt')),
                           value: debt,
                           onChanged: (value) {
                             setState(() {
@@ -77,7 +78,7 @@ class _PersondetailesState extends State<Persondetailes> {
                             widget.person.save();
                           });
                         },
-                        child: Text("Save"),
+                        child: Text(getword(context, 'save')),
                       ),
                     ],
                   );
@@ -97,7 +98,7 @@ class _PersondetailesState extends State<Persondetailes> {
           if (widget.person.transactions.isEmpty)
             Center(
               child: Text(
-                "No transactions yet",
+                getword(context, 'no_transactions_yet'),
                 style: TextStyle(
                   color: MyColors.darkYellow,
                   fontSize: 16,

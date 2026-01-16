@@ -1,3 +1,4 @@
+import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 // import 'package:entitlements/fakedata.dart';
 import 'package:entitlements/mycolors.dart';
@@ -33,7 +34,7 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Receivables',
+          getword(context, 'receivables'),
           style: TextStyle(
             color: MyColors.title,
             fontWeight: FontWeight.bold,
@@ -50,50 +51,56 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
         child: Column(
           children: [
             SizedBox(height: 10),
-            MyTextField(hintText: 'Search', icon: Icons.search),
+            MyTextField(
+              hintText: getword(context, 'search'),
+              icon: Icons.search,
+            ),
             SizedBox(height: 30),
             if (receivablesTran.isEmpty)
-              Center(child: Text('No receivables found'))
+              Center(child: Text(getword(context, 'no_receivables_found')))
             else
-            Expanded(
-              child: ListView.builder(
-                itemCount: receivablesTran.length,
-                itemBuilder: (context, index) {
-                  final tran = receivablesTran[index];
-                  return Card(
-                    color: MyColors.lightBlack,
-                    elevation: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ListTile(
-                        leading: Icon(Icons.add_circle, color: MyColors.green),
-                        title: Text(
-                          "${tran['name']}",
-                          style: TextStyle(
+              Expanded(
+                child: ListView.builder(
+                  itemCount: receivablesTran.length,
+                  itemBuilder: (context, index) {
+                    final tran = receivablesTran[index];
+                    return Card(
+                      color: MyColors.lightBlack,
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.add_circle,
                             color: MyColors.green,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                          ),
+                          title: Text(
+                            "${tran['name']}",
+                            style: TextStyle(
+                              color: MyColors.green,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          trailing: Column(
+                            children: [
+                              SizedBox(height: 11),
+                              Text(
+                                '${tran["amount"]} RY',
+                                style: TextStyle(
+                                  color: MyColors.green,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        trailing: Column(
-                          children: [
-                            SizedBox(height: 11),
-                            Text(
-                              '${tran["amount"]} RY',
-                              style: TextStyle(
-                                color: MyColors.green,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 import 'package:entitlements/mycolors.dart';
 import 'package:entitlements/persondetailes.dart';
@@ -22,13 +23,13 @@ class _MyClientsState extends State<MyClients> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Clients")),
+      appBar: AppBar(title: Text(getword(context, 'clients'))),
       body: Column(
         children: [
           if (people.isEmpty)
             Center(
               child: Text(
-                "No people yet",
+                getword(context, 'no_people_yet'),
                 style: TextStyle(
                   color: MyColors.darkYellow,
                   fontSize: 16,
@@ -50,7 +51,7 @@ class _MyClientsState extends State<MyClients> {
                       child: ListTile(
                         leading: Icon(Icons.person, color: MyColors.darkYellow),
                         title: Text(
-                          "Person ${index + 1}",
+                          "${getword(context, 'person')} ${index + 1}",
                           style: TextStyle(
                             color: MyColors.darkYellow,
                             fontSize: 14,

@@ -1,4 +1,5 @@
 // import 'package:entitlements/addtransaction.dart';
+import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 import 'package:entitlements/mybuttom.dart';
 import 'package:entitlements/myclients.dart';
@@ -47,12 +48,12 @@ class _HomepageState extends State<Homepage> {
             builder: (context) {
               TextEditingController nameController = TextEditingController();
               return AlertDialog(
-                title: Text("add a new person"),
+                title: Text(getword(context, 'add_a_new_person')),
                 content: TextField(
                   controller: nameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Enter person name",
+                    hintText: getword(context, 'enter_person_name'),
                   ),
                 ),
                 actions: [
@@ -66,7 +67,7 @@ class _HomepageState extends State<Homepage> {
                       Navigator.pop(context);
                       setState(() {});
                     },
-                    child: Text("Save"),
+                    child: Text(getword(context, 'save')),
                   ),
                 ],
               );
@@ -85,7 +86,7 @@ class _HomepageState extends State<Homepage> {
         //   size: 30,
         // ),
         title: Text(
-          'Entitlements',
+          getword(context, 'entitlements'),
           style: TextStyle(
             color: MyColors.title,
             fontWeight: FontWeight.bold,
@@ -112,14 +113,17 @@ class _HomepageState extends State<Homepage> {
               child: ListTile(
                 leading: Icon(Icons.person, color: MyColors.darkYellow),
                 title: Text(
-                  "My Clients",
+                  getword(context, 'my_clients'),
                   style: TextStyle(
                     color: MyColors.darkYellow,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MyClients())),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyClients()),
+                ),
               ),
             ),
             Card(
@@ -130,14 +134,17 @@ class _HomepageState extends State<Homepage> {
               child: ListTile(
                 leading: Icon(Icons.settings, color: MyColors.darkYellow),
                 title: Text(
-                  "Settings",
+                  getword(context, 'settings'),
                   style: TextStyle(
                     color: MyColors.darkYellow,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Settings())),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Settings()),
+                ),
               ),
             ),
           ],
@@ -149,13 +156,16 @@ class _HomepageState extends State<Homepage> {
         child: Column(
           children: [
             SizedBox(height: 10),
-            MyTextField(hintText: 'Search', icon: Icons.search),
+            MyTextField(
+              hintText: getword(context, 'search'),
+              icon: Icons.search,
+            ),
             SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
                   child: MyButtom(
-                    text: 'RECEIVABLES',
+                    text: getword(context, 'receivables'),
                     icon: Icons.arrow_upward,
                     onTap: () {
                       Navigator.push(
@@ -170,7 +180,7 @@ class _HomepageState extends State<Homepage> {
                 SizedBox(width: 10),
                 Expanded(
                   child: MyButtom(
-                    text: 'PAYABLES',
+                    text: getword(context, 'payables'),
                     icon: Icons.arrow_downward,
                     onTap: () {
                       Navigator.push(
@@ -193,7 +203,7 @@ class _HomepageState extends State<Homepage> {
                 ),
                 child: Center(
                   child: Text(
-                    "Recent Transactions",
+                    getword(context, 'recent_transactions'),
                     style: TextStyle(
                       color: MyColors.darkYellow,
                       fontSize: 16,
@@ -207,7 +217,7 @@ class _HomepageState extends State<Homepage> {
             if (recentTran.isEmpty)
               Center(
                 child: Text(
-                  "No transactions yet",
+                  getword(context, 'no_transactions_yet'),
                   style: TextStyle(
                     color: MyColors.darkYellow,
                     fontSize: 16,
@@ -239,8 +249,8 @@ class _HomepageState extends State<Homepage> {
                             "${tran['name']}",
                             style: TextStyle(
                               color: tran["data"].isdebt
-                                  ?MyColors.green
-                                : MyColors.red,
+                                  ? MyColors.green
+                                  : MyColors.red,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
