@@ -21,7 +21,7 @@ class _PersondetailesState extends State<Persondetailes> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: MyColors.lightBlack,
         shape: StadiumBorder(),
-        onPressed: () {
+        onPressed: () async {
           showDialog(
             context: context,
             builder: (context) {
@@ -29,7 +29,7 @@ class _PersondetailesState extends State<Persondetailes> {
               TextEditingController descriptionController =
                   TextEditingController();
               return StatefulBuilder(
-                builder: (context, setState) {
+                builder: (context, dialogSetState) {
                   return AlertDialog(
                     title: Text(getword(context, 'add_a_new_transaction')),
                     content: Column(
@@ -54,7 +54,7 @@ class _PersondetailesState extends State<Persondetailes> {
                           title: Text(getword(context, 'is_debt')),
                           value: debt,
                           onChanged: (value) {
-                            setState(() {
+                            dialogSetState(() {
                               debt = value;
                             });
                           },
@@ -64,7 +64,7 @@ class _PersondetailesState extends State<Persondetailes> {
                     actions: [
                       // TextButton(onPressed: (){}, child: Text("Cancel")),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           widget.person.transactions.add(
                             Transaction(
                               amount: double.parse(amountController.text),
@@ -74,9 +74,8 @@ class _PersondetailesState extends State<Persondetailes> {
                             ),
                           );
                           Navigator.pop(context);
-                          setState(() {
-                            widget.person.save();
-                          });
+                          await widget.person.save();
+                          setState(() {});
                         },
                         child: Text(getword(context, 'save')),
                       ),

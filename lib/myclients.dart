@@ -1,6 +1,7 @@
 import 'package:entitlements/appwords.dart';
 import 'package:entitlements/datastructure.dart';
 import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/mytextfield.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -13,19 +14,76 @@ class MyClients extends StatefulWidget {
 }
 
 class _MyClientsState extends State<MyClients> {
+  String searchName = '';
+
   List<Person> getAllPeople() {
     var box = Hive.box<Person>("clientsBox");
     return box.values.toList();
   }
 
-  List<Person> get people => getAllPeople();
+  List<Person> get people => getAllPeople()
+      .where(
+        (person) =>
+            person.name.toLowerCase().contains(searchName.toLowerCase()),
+      )
+      .toList();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: MyColors.lightBlack,
+        shape: StadiumBorder(),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              TextEditingController nameController = TextEditingController();
+              return AlertDialog(
+                title: Text(getword(context, 'add_a_new_person')),
+                content: TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: getword(context, 'enter_person_name'),
+                  ),
+                ),
+                actions: [
+                  // TextButton(onPressed: (){}, child: Text("Cancel")),
+                  TextButton(
+                    onPressed: () {
+                      var box = Hive.box<Person>("clientsBox");
+                      box.add(
+                        Person(name: nameController.text, transactions: []),
+                      );
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    child: Text(getword(context, 'save')),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add, color: MyColors.darkYellow, size: 30),
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
       appBar: AppBar(title: Text(getword(context, 'clients'))),
       body: Column(
         children: [
+          SizedBox(height: 10),
+          MyTextField(
+            hintText: getword(context, 'search'),
+            icon: Icons.search,
+            onChanged: (value) {
+              setState(() {
+                searchName = value.toLowerCase();
+              });
+            },
+          ),
           if (people.isEmpty)
             Center(
               child: Text(
@@ -66,6 +124,14 @@ class _MyClientsState extends State<MyClients> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        trailing: Text(
+                          "${person.totalAmount.toInt()}",
+                          style: TextStyle(
+                            color: MyColors.darkYellow,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -73,6 +139,113 @@ class _MyClientsState extends State<MyClients> {
                               builder: (context) =>
                                   Persondetailes(person: person),
                             ),
+                          );
+                        },
+                        onLongPress: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: MyColors.background,
+                            builder: (context) {
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.edit,
+                                      color: MyColors.darkYellow,
+                                      size: 30,
+                                      semanticLabel: 'Edit person',
+                                    ),
+                                    title: Text('Edit person'),
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          TextEditingController editController =
+                                              TextEditingController(
+                                                  text: person.name);
+                                          return AlertDialog(
+                                            title: Text(
+                                              getword(
+                                                context,
+                                                'edit_name',
+                                              ),
+                                            ),
+                                            content: TextField(
+                                              controller: editController,
+                                              decoration: InputDecoration(
+                                                border: OutlineInputBorder(),
+                                                hintText: getword(
+                                                  context,
+                                                  'the new name',
+                                                ),
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  person.name = editController.text;
+                                                  Navigator.pop(context);
+                                                  setState(() {});
+                                                },
+                                                child: Text(
+                                                  getword(context, 'save'),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.delete,
+                                      color: MyColors.darkYellow,
+                                      size: 30,
+                                      semanticLabel: 'Delete person',
+                                    ),
+                                    title: Text('Delete person'),
+                                    onTap: () async {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Text('Delete person'),
+                                          content: Text(
+                                            'Are you sure you want to delete this person?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () async {
+                                                await person.delete();
+                                                Navigator.pop(context);
+                                                if (mounted) {
+                                                  setState(() {});
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Person deleted',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
                       ),

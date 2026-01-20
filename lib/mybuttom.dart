@@ -5,11 +5,13 @@ class MyButtom extends StatelessWidget {
   final String text;
   final Function()? onTap;
   final IconData icon;
+  final double? width;
   const MyButtom({
     super.key,
     required this.text,
     this.onTap,
     this.icon = Icons.arrow_upward,
+    this.width,
   });
 
   @override
@@ -31,6 +33,7 @@ class MyButtom extends StatelessWidget {
           ],
         ),
         height: 60,
+        width: width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

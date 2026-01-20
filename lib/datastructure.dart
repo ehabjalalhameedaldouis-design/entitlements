@@ -23,7 +23,7 @@ class Transaction {
 @HiveType(typeId: 1)
 class Person extends HiveObject {
   @HiveField(0)
-  final String name;
+  String name;
   @HiveField(1)
   final List<Transaction> transactions;
 

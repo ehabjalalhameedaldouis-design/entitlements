@@ -31,7 +31,7 @@ class _HomepageState extends State<Homepage> {
       }
     }
     recentTransactions.sort((a, b) => b['data'].time.compareTo(a['data'].time));
-    return recentTransactions.take(4).toList();
+    return recentTransactions.take(3).toList();
   }
 
   List get recentTran => getRecentTransactions();
@@ -39,52 +39,9 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: MyColors.lightBlack,
-        shape: StadiumBorder(),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              TextEditingController nameController = TextEditingController();
-              return AlertDialog(
-                title: Text(getword(context, 'add_a_new_person')),
-                content: TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: getword(context, 'enter_person_name'),
-                  ),
-                ),
-                actions: [
-                  // TextButton(onPressed: (){}, child: Text("Cancel")),
-                  TextButton(
-                    onPressed: () {
-                      var box = Hive.box<Person>("clientsBox");
-                      box.add(
-                        Person(name: nameController.text, transactions: []),
-                      );
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    child: Text(getword(context, 'save')),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        child: Icon(Icons.add, color: MyColors.darkYellow, size: 30),
-      ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      
 
       appBar: AppBar(
-        // leading: Icon(
-        //   Icons.account_balance_wallet,
-        //   color: MyColors.title,
-        //   size: 30,
-        // ),
         title: Text(
           getword(context, 'entitlements'),
           style: TextStyle(
@@ -105,27 +62,6 @@ class _HomepageState extends State<Homepage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ListView(
           children: [
-            Card(
-              color: MyColors.lightBlack,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.person, color: MyColors.darkYellow),
-                title: Text(
-                  getword(context, 'my_clients'),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyClients()),
-                ),
-              ),
-            ),
             Card(
               color: MyColors.lightBlack,
               shape: RoundedRectangleBorder(
@@ -155,11 +91,6 @@ class _HomepageState extends State<Homepage> {
         padding: const EdgeInsets.all(6.0),
         child: Column(
           children: [
-            SizedBox(height: 10),
-            MyTextField(
-              hintText: getword(context, 'search'),
-              icon: Icons.search,
-            ),
             SizedBox(height: 10),
             Row(
               children: [
@@ -194,6 +125,20 @@ class _HomepageState extends State<Homepage> {
             ),
             SizedBox(height: 10),
             Center(
+              child: MyButtom(
+                width: MediaQuery.of(context).size.width * 0.5,
+                    text: getword(context, 'my_clients'),
+                    icon: Icons.person,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyClients()),
+                      );  
+                    },
+                  ),
+            ),
+            SizedBox(height: 20),
+            Center(
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.5,
                 height: 60,
@@ -213,7 +158,7 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             if (recentTran.isEmpty)
               Center(
                 child: Text(

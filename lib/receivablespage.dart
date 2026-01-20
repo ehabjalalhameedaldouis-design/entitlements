@@ -50,11 +50,6 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
         padding: EdgeInsets.all(6.0),
         child: Column(
           children: [
-            SizedBox(height: 10),
-            MyTextField(
-              hintText: getword(context, 'search'),
-              icon: Icons.search,
-            ),
             SizedBox(height: 30),
             if (receivablesTran.isEmpty)
               Center(child: Text(getword(context, 'no_receivables_found')))

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 class AppWords {
   static Map<String, Map<String, String>> words = {
     'en': {
+      'data_log': 'Data Log',
+      'database is empty': 'Database is empty',
+      'show_data': 'Show Data',
+      'show_data_subtitle': 'Show all data',
       'hello': 'Hello',
       'receivables': 'RECEIVABLES',
       'payables': 'PAYABLES',
@@ -30,6 +34,10 @@ class AppWords {
       'english_language': 'English(English)',
     },
     'ar': {
+      'data_log': 'سجل البيانات',
+      'database is empty': 'قاعدة البيانات فارغة',
+      'show_data': 'عرض البيانات',
+      'show_data_subtitle': 'عرض جميع البيانات',
       'hello': 'مرحبا',
       'receivables': 'المستحقات',
       'payables': 'المدفوعات',
@@ -57,6 +65,10 @@ class AppWords {
       'english_language': 'الإنجليزية(English)',
     },
     'zh': {
+      'data_log': '数据日志',
+      'database is empty': '数据库为空',
+      'show_data': '显示数据',
+      'show_data_subtitle': '显示所有数据',
       'hello': '你好',
       'receivables': '应收',
       'payables': '应付',

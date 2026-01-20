@@ -4,7 +4,8 @@ import 'package:entitlements/mycolors.dart';
 class MyTextField extends StatelessWidget {
   final String hintText;
   final IconData icon;
-  const MyTextField({super.key, required this.hintText, required this.icon});
+  final Function(String)? onChanged;
+  const MyTextField({super.key, required this.hintText, required this.icon, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +25,7 @@ class MyTextField extends StatelessWidget {
         hintStyle: TextStyle(color: MyColors.darkYellow),
         focusColor: MyColors.darkYellow,
       ),
+      onChanged: onChanged,
     );
   }
 }
