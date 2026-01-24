@@ -28,6 +28,8 @@ class _PayablesPageState extends State<PayablesPage> {
   }
 
   List get payablesTran => getPayablesTransactions();
+  double get allpayables => payablesTran.fold(0, (previousValue, element) => previousValue + element['amount']);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,9 +97,20 @@ class _PayablesPageState extends State<PayablesPage> {
                   },
                 ),
               ),
-          ],
+            ],
         ),
       ),
     );
   }
+}
+
+double getallpayables() {
+  var box = Hive.box<Person>("clientsBox");
+  double total = 0;
+  for (var person in box.values) {
+    if (person.totalAmount < 0) {
+      total += person.totalAmount;
+    }
+  }
+  return total;
 }

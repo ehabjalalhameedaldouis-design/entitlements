@@ -2,15 +2,15 @@ import 'package:hive/hive.dart';
 part 'datastructure.g.dart';
 
 @HiveType(typeId: 0)
-class Transaction {
+class Transaction extends HiveObject {
   @HiveField(0)
-  final double amount;
+  double amount;
   @HiveField(1)
   final DateTime time;
   @HiveField(2)
-  final String description;
+  String description;
   @HiveField(3)
-  final bool isdebt;
+  bool isdebt;
 
   Transaction({
     required this.amount,

@@ -11,11 +11,15 @@ void main() async {
   Hive.registerAdapter(PersonAdapter());
   Hive.registerAdapter(TransactionAdapter());
   await Hive.openBox<Person>('clientsBox');
-  runApp(const DebtManager());
+  await Hive.openBox("settingsBox");
+  var box = Hive.box("settingsBox");
+  var language = box.get('language', defaultValue: 'en');
+  runApp(DebtManager(language: language));
 }
 
 class DebtManager extends StatefulWidget {
-  const DebtManager({super.key});
+  const DebtManager({super.key, required this.language});
+  final String language;
   static void setLocale(BuildContext context, Locale locale) {
     (context as Element).findAncestorStateOfType<_DebtManagerState>()!.setLocale(locale);
   }
@@ -26,7 +30,14 @@ class DebtManager extends StatefulWidget {
 
 class _DebtManagerState extends State<DebtManager> {
 
-  Locale locale = const Locale('en', 'US');
+  late Locale locale;
+
+  @override
+  void initState() {
+    super.initState();
+    locale = Locale(widget.language);
+  }
+
   void setLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;

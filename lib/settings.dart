@@ -41,6 +41,8 @@ class _SettingsState extends State<Settings> {
                 groupValue: Localizations.localeOf(context).languageCode,
                 onChanged: (value) {
                   DebtManager.setLocale(context, Locale('ar', 'SA'));
+                  var box = Hive.box('settingsBox');
+                  box.put('language', value);
                 },
               ),
               RadioListTile<String>(
@@ -50,6 +52,8 @@ class _SettingsState extends State<Settings> {
                 groupValue: Localizations.localeOf(context).languageCode,
                 onChanged: (value) {
                   DebtManager.setLocale(context, Locale('zh', 'CN'));
+                  var box = Hive.box('settingsBox');
+                  box.put('language', value);
                 },
               ),
               RadioListTile<String>(
@@ -59,42 +63,44 @@ class _SettingsState extends State<Settings> {
                 groupValue: Localizations.localeOf(context).languageCode,
                 onChanged: (value) {
                   DebtManager.setLocale(context, Locale('en', 'US'));
+                  var box = Hive.box('settingsBox');
+                  box.put('language', value);
                 },
               ),
             ],
           ),
-          ListTile(
-            leading: Icon(Icons.bug_report, color: MyColors.darkYellow),
-            title: Text(
-              getword(context, 'show_data'),
-              style: TextStyle(
-                color: MyColors.darkYellow,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(
-              getword(context, 'show_data_subtitle'),
-              style: TextStyle(
-                color: MyColors.darkYellow,
-                fontSize: 14,
-              ),
-            ),
-            onTap: () {
-              var box = Hive.box<Person>('clientsBox');
-              print("==========${getword(context, 'data_log')}==========");
-              if (box.isEmpty) {
-                print(getword(context, 'database is empty'));
-              } else {
-                for (var key in box.keys) {
-                  var person = box.get(key);
-                  print("Name: ${person?.name}");
-                  print("Transactions: ${person?.transactions.length}");
-                }
-              }
-              print("======================================");
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.bug_report, color: MyColors.darkYellow),
+          //   title: Text(
+          //     getword(context, 'show_data'),
+          //     style: TextStyle(
+          //       color: MyColors.darkYellow,
+          //       fontSize: 16,
+          //       fontWeight: FontWeight.bold,
+          //     ),
+          //   ),
+          //   subtitle: Text(
+          //     getword(context, 'show_data_subtitle'),
+          //     style: TextStyle(
+          //       color: MyColors.darkYellow,
+          //       fontSize: 14,
+          //     ),
+          //   ),
+          //   onTap: () {
+          //     var box = Hive.box<Person>('clientsBox');
+          //     print("==========${getword(context, 'data_log')}==========");
+          //     if (box.isEmpty) {
+          //       print(getword(context, 'database is empty'));
+          //     } else {
+          //       for (var key in box.keys) {
+          //         var person = box.get(key);
+          //         print("Name: ${person?.name}");
+          //         print("Transactions: ${person?.transactions.length}");
+          //       }
+          //     }
+          //     print("======================================");
+          //   },
+          // ),
         ],
       ),
     );

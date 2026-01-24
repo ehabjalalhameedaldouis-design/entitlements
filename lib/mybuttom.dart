@@ -6,12 +6,14 @@ class MyButtom extends StatelessWidget {
   final Function()? onTap;
   final IconData icon;
   final double? width;
+  final double allamount;
   const MyButtom({
     super.key,
     required this.text,
     this.onTap,
     this.icon = Icons.arrow_upward,
     this.width,
+    required this.allamount,
   });
 
   @override
@@ -32,9 +34,12 @@ class MyButtom extends StatelessWidget {
             ),
           ],
         ),
-        height: 60,
+        height: 70,
         width: width,
-        child: Row(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: MyColors.darkYellow),
@@ -47,6 +52,9 @@ class MyButtom extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ],
+        ),
+        Text(allamount.toString(), style: TextStyle(color: MyColors.darkYellow, fontSize: 15, fontWeight: FontWeight.bold),)
           ],
         ),
       ),

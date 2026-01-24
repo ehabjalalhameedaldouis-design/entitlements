@@ -15,6 +15,8 @@ class MyClients extends StatefulWidget {
 
 class _MyClientsState extends State<MyClients> {
   String searchName = '';
+  final formkey = GlobalKey<FormState>();
+  final editkey = GlobalKey<FormState>();
 
   List<Person> getAllPeople() {
     var box = Hive.box<Person>("clientsBox");
@@ -41,23 +43,40 @@ class _MyClientsState extends State<MyClients> {
               TextEditingController nameController = TextEditingController();
               return AlertDialog(
                 title: Text(getword(context, 'add_a_new_person')),
-                content: TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: getword(context, 'enter_person_name'),
+                content: Form(
+                  key: formkey,
+                  child: TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: getword(context, 'enter_person_name'),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return getword(context, 'please_enter_a_name');
+                      }
+                      if (!RegExp(
+                        r'^[\p{L}\s]+$',
+                        unicode: true,
+                      ).hasMatch(value)) {
+                        return getword(context, 'please_enter_a_valid_name');
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 actions: [
                   // TextButton(onPressed: (){}, child: Text("Cancel")),
                   TextButton(
                     onPressed: () {
-                      var box = Hive.box<Person>("clientsBox");
-                      box.add(
-                        Person(name: nameController.text, transactions: []),
-                      );
-                      Navigator.pop(context);
-                      setState(() {});
+                      if (formkey.currentState!.validate()) {
+                        var box = Hive.box<Person>("clientsBox");
+                        box.add(
+                          Person(name: nameController.text, transactions: []),
+                        );
+                        Navigator.pop(context);
+                        setState(() {});
+                      }
                     },
                     child: Text(getword(context, 'save')),
                   ),
@@ -109,14 +128,6 @@ class _MyClientsState extends State<MyClients> {
                       child: ListTile(
                         leading: Icon(Icons.person, color: MyColors.darkYellow),
                         title: Text(
-                          "${getword(context, 'person')} ${index + 1}",
-                          style: TextStyle(
-                            color: MyColors.darkYellow,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
                           person.name,
                           style: TextStyle(
                             color: MyColors.darkYellow,
@@ -132,14 +143,15 @@ class _MyClientsState extends State<MyClients> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
                                   Persondetailes(person: person),
                             ),
                           );
+                          setState(() {});
                         },
                         onLongPress: () {
                           showModalBottomSheet(
@@ -157,35 +169,60 @@ class _MyClientsState extends State<MyClients> {
                                     ),
                                     title: Text('Edit person'),
                                     onTap: () {
+                                      Navigator.pop(context);
                                       showDialog(
                                         context: context,
                                         builder: (context) {
                                           TextEditingController editController =
                                               TextEditingController(
-                                                  text: person.name);
+                                                text: person.name,
+                                              );
                                           return AlertDialog(
                                             title: Text(
-                                              getword(
-                                                context,
-                                                'edit_name',
-                                              ),
+                                              getword(context, 'edit_name'),
                                             ),
-                                            content: TextField(
-                                              controller: editController,
-                                              decoration: InputDecoration(
-                                                border: OutlineInputBorder(),
-                                                hintText: getword(
-                                                  context,
-                                                  'the new name',
+                                            content: Form(
+                                              key: editkey,
+                                              child: TextFormField(
+                                                controller: editController,
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  hintText: getword(
+                                                    context,
+                                                    'enter_person_name',
+                                                  ),
                                                 ),
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return getword(
+                                                      context,
+                                                      'please_enter_a_name',
+                                                    );
+                                                  }
+                                                  if (!RegExp(
+                                                    r'^[\p{L}\s]+$',
+                                                    unicode: true,
+                                                  ).hasMatch(value)) {
+                                                    return getword(
+                                                      context,
+                                                      'please_enter_a_valid_name',
+                                                    );
+                                                  }
+                                                  return null;
+                                                },
                                               ),
                                             ),
                                             actions: [
                                               TextButton(
                                                 onPressed: () {
-                                                  person.name = editController.text;
-                                                  Navigator.pop(context);
-                                                  setState(() {});
+                                                  if (editkey.currentState!
+                                                      .validate()) {
+                                                    person.name =
+                                                        editController.text;
+                                                    Navigator.pop(context);
+                                                    setState(() {});
+                                                  }
                                                 },
                                                 child: Text(
                                                   getword(context, 'save'),
@@ -206,6 +243,7 @@ class _MyClientsState extends State<MyClients> {
                                     ),
                                     title: Text('Delete person'),
                                     onTap: () async {
+                                      Navigator.pop(context);
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(

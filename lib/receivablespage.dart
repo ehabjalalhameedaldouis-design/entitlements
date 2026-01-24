@@ -29,6 +29,7 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
   }
 
   List get receivablesTran => getReceivablesTransactions();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,4 +102,15 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
       ),
     );
   }
+}
+
+double getallreceivables() {
+  var box = Hive.box<Person>("clientsBox");
+  double total = 0;
+  for (var person in box.values) {
+    if (person.totalAmount > 0) {
+      total += person.totalAmount;
+    }
+  }
+  return total;
 }

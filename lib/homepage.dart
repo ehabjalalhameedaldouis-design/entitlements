@@ -35,12 +35,21 @@ class _HomepageState extends State<Homepage> {
   }
 
   List get recentTran => getRecentTransactions();
+  double allreceivables = 0;
+  double allpayables = 0;
+  double allmoney = 0;
+
+  @override
+  void initState() {
+    allreceivables = getallreceivables();
+    allpayables = getallpayables();
+    allmoney = allreceivables - allpayables;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-
       appBar: AppBar(
         title: Text(
           getword(context, 'entitlements'),
@@ -83,6 +92,31 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
             ),
+            Card(
+              color: MyColors.lightBlack,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: ListTile(
+                leading: Icon(Icons.money, color: MyColors.darkYellow),
+                title: Text(
+                  getword(context, 'allmoney'),
+                  style: TextStyle(
+                    color: MyColors.darkYellow,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  allmoney.toString(),
+                  style: TextStyle(
+                    color: MyColors.darkYellow,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -106,6 +140,7 @@ class _HomepageState extends State<Homepage> {
                         ),
                       );
                     },
+                    allamount: allreceivables,
                   ),
                 ),
                 SizedBox(width: 10),
@@ -119,128 +154,59 @@ class _HomepageState extends State<Homepage> {
                         MaterialPageRoute(builder: (context) => PayablesPage()),
                       );
                     },
+                    allamount: allpayables,
                   ),
                 ),
               ],
             ),
             SizedBox(height: 10),
             Center(
-              child: MyButtom(
-                width: MediaQuery.of(context).size.width * 0.5,
-                    text: getword(context, 'my_clients'),
-                    icon: Icons.person,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyClients()),
-                      );  
-                    },
-                  ),
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: MyColors.lightBlack,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Center(
-                  child: Text(
-                    getword(context, 'recent_transactions'),
-                    style: TextStyle(
-                      color: MyColors.darkYellow,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            if (recentTran.isEmpty)
-              Center(
-                child: Text(
-                  getword(context, 'no_transactions_yet'),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  itemCount: recentTran.length,
-                  itemBuilder: (context, index) {
-                    final tran = recentTran[index];
-                    return Card(
-                      color: MyColors.lightBlack,
-                      elevation: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: ListTile(
-                          leading: Icon(
-                            tran["data"].isdebt
-                                ? Icons.add_circle
-                                : Icons.remove_circle,
-                            color: tran["data"].isdebt
-                                ? MyColors.green
-                                : MyColors.red,
-                          ),
-                          title: Text(
-                            "${tran['name']}",
-                            style: TextStyle(
-                              color: tran["data"].isdebt
-                                  ? MyColors.green
-                                  : MyColors.red,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            "${tran['data'].description}",
-                            style: TextStyle(
-                              color: tran["data"].isdebt
-                                  ? MyColors.green
-                                  : MyColors.red,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          trailing: Column(
-                            children: [
-                              SizedBox(height: 11),
-                              Text(
-                                '${tran["data"].amount} RY',
-                                style: TextStyle(
-                                  color: tran["data"].isdebt
-                                      ? MyColors.green
-                                      : MyColors.red,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${tran['data'].time.day}/${tran['data'].time.month}/${tran['data'].time.year}',
-                                style: TextStyle(
-                                  color: tran["data"].isdebt
-                                      ? MyColors.green
-                                      : MyColors.red,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyClients()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(30),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    color: MyColors.lightBlack,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black,
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
                       ),
-                    );
-                  },
+                    ],
+                  ),
+                  height: 60,
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person, color: MyColors.darkYellow),
+                          SizedBox(width: 4),
+                          Text(
+                            getword(context, 'my_clients'),
+                            style: TextStyle(
+                              color: MyColors.darkYellow,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ),
           ],
         ),
       ),
