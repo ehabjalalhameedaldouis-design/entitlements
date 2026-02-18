@@ -1,9 +1,9 @@
-import 'package:entitlements/appwords.dart';
-import 'package:entitlements/datastructure.dart';
-// import 'package:entitlements/fakedata.dart';
-import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/data/datastructure.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
-import 'package:entitlements/mytextfield.dart';
+import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:hive/hive.dart';
 
 class ReceivablesPage extends StatefulWidget {
@@ -33,20 +33,9 @@ class _ReceivablesPageState extends State<ReceivablesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          getword(context, 'receivables'),
-          style: TextStyle(
-            color: MyColors.title,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-          ),
+      appBar: Myappbar(
+        title:"receivables"
         ),
-        centerTitle: true,
-        elevation: 8,
-        shadowColor: Colors.black,
-        surfaceTintColor: Colors.transparent,
-      ),
       body: Padding(
         padding: EdgeInsets.all(6.0),
         child: Column(

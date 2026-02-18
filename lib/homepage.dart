@@ -1,16 +1,17 @@
-// import 'package:entitlements/addtransaction.dart';
-import 'package:entitlements/appwords.dart';
-import 'package:entitlements/datastructure.dart';
-import 'package:entitlements/mybuttom.dart';
+import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/data/datastructure.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/signup.dart';
+import 'package:entitlements/mywidgets/mybuttom.dart';
 import 'package:entitlements/myclients.dart';
-import 'package:entitlements/mytextfield.dart';
-// import 'package:entitlements/fakedata.dart';
+import 'package:entitlements/mywidgets/mycard.dart';
+import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/payables.dart';
-// import 'package:entitlements/persondetailes.dart';
-import 'package:entitlements/receivablespage.dart';
+import 'package:entitlements/receivables.dart';
 import 'package:entitlements/settings.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:hive/hive.dart';
 
 class Homepage extends StatefulWidget {
@@ -50,73 +51,30 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          getword(context, 'entitlements'),
-          style: TextStyle(
-            color: MyColors.title,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-          ),
+      appBar: Myappbar(
+        title: "entitlements"
         ),
-        centerTitle: true,
-        backgroundColor: MyColors.background,
-        elevation: 8,
-        shadowColor: Colors.black,
-        surfaceTintColor: Colors.transparent,
-      ),
+
 
       drawer: Drawer(
         backgroundColor: MyColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ListView(
           children: [
-            Card(
-              color: MyColors.lightBlack,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.settings, color: MyColors.darkYellow),
-                title: Text(
-                  getword(context, 'settings'),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: () => Navigator.push(
+            Mycard(label: 'settings', icon: Icons.settings, onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Settings()),
+              );
+            }),
+              Mycard(label: 'sign out', icon: Icons.person_add, onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                if (!context.mounted) return;
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => Settings()),
-                ),
-              ),
-            ),
-            Card(
-              color: MyColors.lightBlack,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.money, color: MyColors.darkYellow),
-                title: Text(
-                  getword(context, 'allmoney'),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: Text(
-                  allmoney.toString(),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+                  MaterialPageRoute(builder: (context) => SignUpScreen()),
+                );
+              }),
           ],
         ),
       ),
@@ -203,6 +161,31 @@ class _HomepageState extends State<Homepage> {
                         ],
                       ),
                     ],
+                  ),
+                ),
+              ),
+            ),
+             Card(
+              color: MyColors.lightBlack,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: ListTile(
+                leading: Icon(Icons.money, color: MyColors.darkYellow),
+                title: Text(
+                  getword(context, 'allmoney'),
+                  style: TextStyle(
+                    color: MyColors.darkYellow,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  allmoney.toString(),
+                  style: TextStyle(
+                    color: MyColors.darkYellow,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
