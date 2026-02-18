@@ -1,12 +1,11 @@
 pluginManagement {
-    val flutterSdkPath =
-        run {
-            val properties = java.util.Properties()
-            file("local.properties").inputStream().use { properties.load(it) }
-            val flutterSdkPath = properties.getProperty("flutter.sdk")
-            require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
-            flutterSdkPath
-        }
+    val flutterSdkPath: String = run {
+        val properties = java.util.Properties()
+        file("local.properties").inputStream().use { properties.load(it) }
+        val path = properties.getProperty("flutter.sdk")
+        require(path != null) { "flutter.sdk not set in local.properties" }
+        path
+    }
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
@@ -14,6 +13,35 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        // Flutter hosted maven for engine/artifact downloads
+        maven {
+            url = uri("https://storage.googleapis.com/download.flutter.io")
+        }
+        // Add Flutter local engine/artifacts maven repositories so io.flutter:* artifacts are resolvable
+        val flutterSdkPath: String = run {
+            val properties = java.util.Properties()
+            file("local.properties").inputStream().use { properties.load(it) }
+            val path = properties.getProperty("flutter.sdk")
+            require(path != null) { "flutter.sdk not set in local.properties" }
+            path
+        }
+        maven {
+            url = uri("$flutterSdkPath/bin/cache/artifacts/engine/")
+        }
+        maven {
+            url = uri("$flutterSdkPath/bin/cache/artifacts/engine/android")
+        }
+        maven {
+            url = uri("$flutterSdkPath/bin/cache/artifacts/engine/common")
+        }
     }
 }
 

@@ -1,7 +1,8 @@
-import 'package:entitlements/appwords.dart';
-import 'package:entitlements/datastructure.dart';
-import 'package:entitlements/mycolors.dart';
-import 'package:entitlements/mytextfield.dart';
+import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/data/datastructure.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
+import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -66,7 +67,6 @@ class _MyClientsState extends State<MyClients> {
                   ),
                 ),
                 actions: [
-                  // TextButton(onPressed: (){}, child: Text("Cancel")),
                   TextButton(
                     onPressed: () {
                       if (formkey.currentState!.validate()) {
@@ -90,13 +90,16 @@ class _MyClientsState extends State<MyClients> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      appBar: AppBar(title: Text(getword(context, 'clients'))),
+      appBar:  Myappbar(
+        title:"clients"
+        ),
       body: Column(
         children: [
           SizedBox(height: 10),
           MyTextField(
+            label: getword(context, 'search'),
             hintText: getword(context, 'search'),
-            icon: Icons.search,
+            iconpre: Icons.search,
             onChanged: (value) {
               setState(() {
                 searchName = value.toLowerCase();
@@ -257,25 +260,23 @@ class _MyClientsState extends State<MyClients> {
                                                   Navigator.pop(context),
                                               child: Text('Cancel'),
                                             ),
-                                            TextButton(
-                                              onPressed: () async {
-                                                await person.delete();
-                                                Navigator.pop(context);
-                                                if (mounted) {
-                                                  setState(() {});
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        'Person deleted',
-                                                      ),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  final dialogContext = context;
+                                                    await person.delete();
+                                                    if (!dialogContext.mounted) return;
+                                                    if (!mounted) return;
+                                                    Navigator.pop(dialogContext);
+                                                    setState(() {});
+                                                    ScaffoldMessenger.of(dialogContext)
+                                                      .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                      'Person deleted',
                                                     ),
-                                                  );
-                                                }
-                                              },
-                                              child: Text('Delete'),
-                                            ),
+                                                  ));
+                                                },
+                                                child: Text('Delete'),
+                                              ),
                                           ],
                                         ),
                                       );

@@ -1,9 +1,12 @@
-import 'package:entitlements/appwords.dart';
-import 'package:entitlements/datastructure.dart';
+import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/data/datastructure.dart';
 import 'package:entitlements/main.dart';
-import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+
+// ignore_for_file: deprecated_member_use
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -16,7 +19,9 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(getword(context, 'settings'))),
+      appBar: Myappbar(
+        title:"settings"
+        ),
       body: Column(
         children: [
           ExpansionTile(
@@ -34,7 +39,7 @@ class _SettingsState extends State<Settings> {
             iconColor: MyColors.darkYellow,
             textColor: MyColors.darkYellow,
             children: [
-              RadioListTile<String>(
+                RadioListTile<String>(
                 activeColor: MyColors.darkYellow,
                 title: Text(getword(context, 'arabic_language')),
                 value: 'ar',
@@ -45,7 +50,7 @@ class _SettingsState extends State<Settings> {
                   box.put('language', value);
                 },
               ),
-              RadioListTile<String>(
+                RadioListTile<String>(
                 activeColor: MyColors.darkYellow,
                 title: Text(getword(context, 'chinese_language')),
                 value: 'zh',
@@ -56,7 +61,7 @@ class _SettingsState extends State<Settings> {
                   box.put('language', value);
                 },
               ),
-              RadioListTile<String>(
+                RadioListTile<String>(
                 activeColor: MyColors.darkYellow,
                 title: Text(getword(context, 'english_language')),
                 value: 'en',
@@ -69,38 +74,7 @@ class _SettingsState extends State<Settings> {
               ),
             ],
           ),
-          // ListTile(
-          //   leading: Icon(Icons.bug_report, color: MyColors.darkYellow),
-          //   title: Text(
-          //     getword(context, 'show_data'),
-          //     style: TextStyle(
-          //       color: MyColors.darkYellow,
-          //       fontSize: 16,
-          //       fontWeight: FontWeight.bold,
-          //     ),
-          //   ),
-          //   subtitle: Text(
-          //     getword(context, 'show_data_subtitle'),
-          //     style: TextStyle(
-          //       color: MyColors.darkYellow,
-          //       fontSize: 14,
-          //     ),
-          //   ),
-          //   onTap: () {
-          //     var box = Hive.box<Person>('clientsBox');
-          //     print("==========${getword(context, 'data_log')}==========");
-          //     if (box.isEmpty) {
-          //       print(getword(context, 'database is empty'));
-          //     } else {
-          //       for (var key in box.keys) {
-          //         var person = box.get(key);
-          //         print("Name: ${person?.name}");
-          //         print("Transactions: ${person?.transactions.length}");
-          //       }
-          //     }
-          //     print("======================================");
-          //   },
-          // ),
+         
         ],
       ),
     );

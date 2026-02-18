@@ -1,4 +1,4 @@
-import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 
 class MyButtom extends StatelessWidget {

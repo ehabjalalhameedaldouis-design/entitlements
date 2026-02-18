@@ -1,6 +1,7 @@
-import 'package:entitlements/appwords.dart';
-import 'package:entitlements/datastructure.dart';
-import 'package:entitlements/mycolors.dart';
+import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/data/datastructure.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 
 class Persondetailes extends StatefulWidget {
@@ -140,7 +141,9 @@ class _PersondetailesState extends State<Persondetailes> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      appBar: AppBar(title: Text(widget.person.name)),
+      appBar: Myappbar(
+        title: widget.person.name
+        ),
 
       body: Column(
         children: [
@@ -388,7 +391,7 @@ class _PersondetailesState extends State<Persondetailes> {
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                await widget.person.transactions
+                                                widget.person.transactions
                                                     .remove(tran);
                                                 await widget.person.save();
                                                 if (context.mounted) {

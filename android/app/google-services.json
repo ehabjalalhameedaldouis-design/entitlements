@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "849413315878",
+    "project_id": "entitlements-4e111",
+    "storage_bucket": "entitlements-4e111.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849413315878:android:4bebb951772288aabdb5e7",
+        "android_client_info": {
+          "package_name": "com.example.entitlements"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo5odVoSBmENlvx7M458c7hr6lPMz4P1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
