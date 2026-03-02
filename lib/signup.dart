@@ -1,4 +1,3 @@
-import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/homepage.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
@@ -39,7 +38,6 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Inputs
               MyTextField(
                 label: 'Full Name',
                 iconpre: Icons.person_rounded,
@@ -63,21 +61,49 @@ class SignUpScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Action Button
               GestureDetector(
                 onTap: () async {
                   try {
-                    await FirebaseAuth.instance
+                    final creds = await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(
-                      email: emailAddress.text,
-                      password: password.text,
-                    );
+                          email: emailAddress.text.trim(),
+                          password: password.text,
+                        );
                     if (!context.mounted) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
-                    );
+
+                    final user =
+                        FirebaseAuth.instance.currentUser ?? creds.user;
+
+                    if (user != null && !user.emailVerified) {
+                      await user.sendEmailVerification();
+                      await user.reload();
+                    }
+
+                    final reloadedUser = FirebaseAuth.instance.currentUser;
+
+                    if (reloadedUser != null && reloadedUser.emailVerified) {
+                      if (!context.mounted) return;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => Homepage()),
+                      );
+                    } else {
+                      await FirebaseAuth.instance.signOut();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Verification email sent. Please verify your email before signing in.',
+                          ),
+                        ),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignInScreen()),
+                      );
+                    }
                   } on FirebaseAuthException catch (e) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(e.message ?? 'Sign-up failed')),
                     );
@@ -90,10 +116,7 @@ class SignUpScreen extends StatelessWidget {
                     color: MyColors.lightBlack,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      BoxShadow(
-                        color: MyColors.darkYellow,
-                        blurRadius: 20,
-                      ),
+                      BoxShadow(color: MyColors.darkYellow, blurRadius: 20),
                       BoxShadow(
                         color: shadowDark,
                         offset: const Offset(6, 6),
@@ -121,28 +144,6 @@ class SignUpScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-              const Text(
-                'OR REGISTER WITH',
-                style: TextStyle(
-                  color: MyColors.darkYellow,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 25),
-
-              // Social Icons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSocialBtn(Icons.g_mobiledata_outlined),
-                  const SizedBox(width: 24),
-                  _buildSocialBtn(Icons.apple_rounded),
-                  const SizedBox(width: 24),
-                  _buildSocialBtn(Icons.code_rounded),
-                ],
-              ),
 
               const SizedBox(height: 40),
               Row(
@@ -174,25 +175,6 @@ class SignUpScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSocialBtn(IconData icon) {
-    const Color shadowDark = Color(0xFF0D0E0F);
-    const Color shadowLight = Color(0xFF272A2D);
-
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: MyColors.lightBlack,
-        shape: BoxShape.circle,
-        boxShadow: const [
-          BoxShadow(color: shadowDark, offset: Offset(8, 8), blurRadius: 16),
-          BoxShadow(color: shadowLight, offset: Offset(-8, -8), blurRadius: 16),
-        ],
-      ),
-      child: Icon(icon, color: Colors.white60, size: 28),
     );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:entitlements/data/appwords.dart';
-import 'package:entitlements/data/datastructure.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/persondetailes.dart';
+import 'package:entitlements/services/clients_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
 class MyClients extends StatefulWidget {
   const MyClients({super.key});
@@ -18,18 +18,33 @@ class _MyClientsState extends State<MyClients> {
   String searchName = '';
   final formkey = GlobalKey<FormState>();
   final editkey = GlobalKey<FormState>();
+  final String uid = FirebaseAuth.instance.currentUser!.uid;
+  late final ClientsService clientsService;
 
-  List<Person> getAllPeople() {
-    var box = Hive.box<Person>("clientsBox");
-    return box.values.toList();
+  Future<void> addUser(String name, BuildContext context) {
+    return clientsService
+        .addClient(name)
+        .then((value) {
+          if (!context.mounted) return;
+          setState(() {});
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("$name added successfully")));
+        })
+        .catchError((error) {
+          if (!context.mounted) return;
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to add client: $error")),
+          );
+        });
   }
 
-  List<Person> get people => getAllPeople()
-      .where(
-        (person) =>
-            person.name.toLowerCase().contains(searchName.toLowerCase()),
-      )
-      .toList();
+  @override
+  void initState() {
+    super.initState();
+    clientsService = ClientsService(uid: uid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +83,11 @@ class _MyClientsState extends State<MyClients> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (formkey.currentState!.validate()) {
-                        var box = Hive.box<Person>("clientsBox");
-                        box.add(
-                          Person(name: nameController.text, transactions: []),
-                        );
+                        await addUser(nameController.text, context);
+                        if (!context.mounted) return;
                         Navigator.pop(context);
-                        setState(() {});
                       }
                     },
                     child: Text(getword(context, 'save')),
@@ -90,9 +102,7 @@ class _MyClientsState extends State<MyClients> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      appBar:  Myappbar(
-        title:"clients"
-        ),
+      appBar: Myappbar(title: "clients"),
       body: Column(
         children: [
           SizedBox(height: 10),
@@ -106,20 +116,18 @@ class _MyClientsState extends State<MyClients> {
               });
             },
           ),
-          if (people.isEmpty)
-            Center(
-              child: Text(
-                getword(context, 'no_people_yet'),
-                style: TextStyle(
-                  color: MyColors.darkYellow,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else
             Expanded(
-              child: ListView.builder(
+              child: StreamBuilder(
+                stream: clientsService.getClientsQuery(searchName).snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text(getword(context, 'no_clients_found')));
+                  }
+                    List people = snapshot.data!.docs;
+                  return ListView.builder(
                 itemCount: people.length,
                 itemBuilder: (context, index) {
                   final person = people[index];
@@ -131,7 +139,7 @@ class _MyClientsState extends State<MyClients> {
                       child: ListTile(
                         leading: Icon(Icons.person, color: MyColors.darkYellow),
                         title: Text(
-                          person.name,
+                          person['full_name'],
                           style: TextStyle(
                             color: MyColors.darkYellow,
                             fontSize: 12,
@@ -139,7 +147,7 @@ class _MyClientsState extends State<MyClients> {
                           ),
                         ),
                         trailing: Text(
-                          "${person.totalAmount.toInt()}",
+                          "${person['total_amount']} ${getword(context, 'currency')}",
                           style: TextStyle(
                             color: MyColors.darkYellow,
                             fontSize: 12,
@@ -150,8 +158,10 @@ class _MyClientsState extends State<MyClients> {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  Persondetailes(person: person),
+                              builder: (context) => Persondetailes(
+                                person: clientsService.clientDoc(person.id),
+                                name: person['full_name'],
+                              ),
                             ),
                           );
                           setState(() {});
@@ -178,7 +188,7 @@ class _MyClientsState extends State<MyClients> {
                                         builder: (context) {
                                           TextEditingController editController =
                                               TextEditingController(
-                                                text: person.name,
+                                                text: person['full_name'],
                                               );
                                           return AlertDialog(
                                             title: Text(
@@ -218,13 +228,25 @@ class _MyClientsState extends State<MyClients> {
                                             ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   if (editkey.currentState!
                                                       .validate()) {
-                                                    person.name =
-                                                        editController.text;
+                                                    await clientsService
+                                                        .updateClientName(
+                                                          person.id,
+                                                          editController.text,
+                                                        );
+                                                    if (!context.mounted) return;
                                                     Navigator.pop(context);
-                                                    setState(() {});
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Person updated',
+                                                        ),
+                                                      ),
+                                                    );
                                                   }
                                                 },
                                                 child: Text(
@@ -260,23 +282,26 @@ class _MyClientsState extends State<MyClients> {
                                                   Navigator.pop(context),
                                               child: Text('Cancel'),
                                             ),
-                                              TextButton(
-                                                onPressed: () async {
-                                                  final dialogContext = context;
-                                                    await person.delete();
-                                                    if (!dialogContext.mounted) return;
-                                                    if (!mounted) return;
-                                                    Navigator.pop(dialogContext);
-                                                    setState(() {});
-                                                    ScaffoldMessenger.of(dialogContext)
-                                                      .showSnackBar(SnackBar(
+                                            TextButton(
+                                              onPressed: () async {
+                                                await clientsService
+                                                    .deleteClientWithTransactions(
+                                                      person.id,
+                                                    );
+                                                if (!context.mounted) return;
+                                                Navigator.pop(context);
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
                                                     content: Text(
                                                       'Person deleted',
                                                     ),
-                                                  ));
-                                                },
-                                                child: Text('Delete'),
-                                              ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text('Delete'),
+                                            ),
                                           ],
                                         ),
                                       );
@@ -291,7 +316,8 @@ class _MyClientsState extends State<MyClients> {
                     ),
                   );
                 },
-              ),
+              );
+                },              ),
             ),
         ],
       ),

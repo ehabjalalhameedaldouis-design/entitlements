@@ -33,7 +33,7 @@ class MyTextField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPassword,
@@ -42,8 +42,8 @@ class MyTextField extends StatelessWidget {
           decoration: InputDecoration(
             fillColor: MyColors.lightBlack,
             filled: true,
-            suffixIcon: Icon(iconsuf, color: MyColors.darkYellow),
-            prefixIcon: Icon(iconpre, color: MyColors.darkYellow),
+            suffixIcon: iconsuf != null ? Icon(iconsuf, color: MyColors.darkYellow) : null,
+            prefixIcon: iconpre != null ? Icon(iconpre, color: MyColors.darkYellow) : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: MyColors.darkYellow),
@@ -55,7 +55,7 @@ class MyTextField extends StatelessWidget {
           ),
           onChanged: onChanged,
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 20),
       ],
     );
   }

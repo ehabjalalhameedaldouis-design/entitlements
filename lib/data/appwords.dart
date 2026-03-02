@@ -47,6 +47,10 @@ class AppWords {
       'transaction_deleted': 'Transaction deleted',
       'ry': 'RY',
       'allmoney': 'All Money',
+      'currency': 'RY',
+      'edit_name': 'Edit name',
+      'no_clients_found': 'No clients found',
+      'no_net_balance': 'No net balance',
     },
     'ar': {
       'data_log': 'سجل البيانات',
@@ -92,6 +96,10 @@ class AppWords {
       'transaction_deleted': 'تم حذف المعاملة',
       'ry': 'ريال',
       'allmoney': 'كل المال',
+      'currency': 'ريال',
+      'edit_name': 'تعديل الاسم',
+      'no_clients_found': 'لا يوجد عملاء',
+      'no_net_balance': 'لا يوجد صافي رصيد',
     },
     'zh': {
       'data_log': '数据日志',
@@ -137,6 +145,10 @@ class AppWords {
       'transaction_deleted': '交易已删除',
       'ry': '人民币',
       'allmoney': '所有金额',
+      'currency': '人民币',
+      'edit_name': '编辑姓名',
+      'no_clients_found': '未找到客户',
+      'no_net_balance': '暂无净余额',
     },
   };
 }

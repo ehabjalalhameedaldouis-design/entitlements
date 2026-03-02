@@ -18,7 +18,7 @@ The app contains three interfaces:
 
 
 
-The application works completely offline and the data is stored using the hive library on your phone, so if the application is deleted, all the data will disappear.
+The application stores data locally on the device. If the application is deleted, locally stored data will be removed.
 
 https://github.com/user-attachments/assets/e6d6709b-2e59-4272-9980-1523b26b94f2
 

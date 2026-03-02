@@ -1,4 +1,4 @@
-import 'package:entitlements/data/appwords.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/homepage.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
@@ -6,12 +6,56 @@ import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class SignInScreen extends StatelessWidget {
-  SignInScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController emailAddress = TextEditingController();
   final TextEditingController password = TextEditingController();
+
+  Future<UserCredential?> signInWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount account = await GoogleSignIn.instance
+          .authenticate();
+
+      final GoogleSignInAuthentication authentication = account.authentication;
+      final GoogleSignInClientAuthorization? clientAuth = await account
+          .authorizationClient
+          .authorizationForScopes(<String>['email', 'profile', 'openid']);
+
+      final String? idToken = authentication.idToken;
+      final String? accessToken = clientAuth?.accessToken;
+
+      if (idToken == null && accessToken == null) {
+        if (!context.mounted) return null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to obtain authentication tokens.'),
+          ),
+        );
+        return null;
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } on Exception catch (e) {
+      if (!context.mounted) return null;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +64,7 @@ class SignInScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: Myappbar(title: "sign_in"),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(20),
@@ -38,7 +83,6 @@ class SignInScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Inputs
               MyTextField(
                 label: 'Email Address',
                 iconpre: Icons.email_outlined,
@@ -54,9 +98,51 @@ class SignInScreen extends StatelessWidget {
                 controller: password,
               ),
 
-              const SizedBox(height: 40),
+              Container(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () async {
+                    if (emailAddress.text.trim().isEmpty) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter your email address.'),
+                        ),
+                      );
+                      return;
+                    }
+                    try {
+                      await FirebaseAuth.instance.sendPasswordResetEmail(
+                        email: emailAddress.text.trim(),
+                      );
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to send password reset email.'),
+                        ),
+                      );
+                      return;
+                    }
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Password reset email sent.Please check your inbox and spam folder.\n If you don\'t receive the email within a few minutes, ckeck your email address and try again.',
+                        ),
+                      ),
+                    );
+                  },
 
-              // Action Button
+                  child: Text(
+                    'Forgot Password?',
+                    style: TextStyle(color: MyColors.lightBlack, fontSize: 12),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
               GestureDetector(
                 onTap: () async {
                   try {
@@ -65,13 +151,37 @@ class SignInScreen extends StatelessWidget {
                       password: password.text.trim(),
                     );
                     if (!context.mounted) return;
-                    // Navigate to homepage on successful sign-in
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
-                    );
+                    await FirebaseAuth.instance.currentUser?.reload();
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    if (user != null && user.emailVerified) {
+                      await FirebaseFirestore.instance
+                          .collection('users_accounts')
+                          .doc(user.uid)
+                          .set({
+                            'email': user.email,
+                            'last_sign_in': DateTime.now(),
+                          }, SetOptions(merge: true));
+
+                      if (!context.mounted) return;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => Homepage()),
+                      );
+                    } else {
+                      await FirebaseAuth.instance.signOut();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Please verify your email before signing in. Verification email sent.',
+                          ),
+                        ),
+                      );
+                      await user?.sendEmailVerification();
+                    }
                   } on FirebaseAuthException catch (e) {
-                    // Show error message on sign-in failure
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(e.message ?? 'Sign-in failed')),
                     );
@@ -114,6 +224,58 @@ class SignInScreen extends StatelessWidget {
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  _buildSocialBtn(
+                    context,
+                    Icons.g_mobiledata_outlined,
+                    child: const Icon(
+                      Icons.g_mobiledata_outlined,
+                      color: MyColors.darkYellow,
+                      size: 28,
+                    ),
+                    ontap: () async {
+                      try {
+                        final cred = await signInWithGoogle(context);
+                        if (cred == null) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Google sign-in cancelled'),
+                            ),
+                          );
+                          return;
+                        }
+                        if (cred.user != null) {
+                          await FirebaseFirestore.instance
+                              .collection('users_accounts')
+                              .doc(cred.user!.uid)
+                              .set({
+                                'email': cred.user!.email,
+                                'last_sign_in': DateTime.now(),
+                              }, SetOptions(merge: true));
+                        }
+                        if (!context.mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => Homepage()),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(e.toString())));
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 24),
+                  _buildSocialBtn(context, Icons.apple_rounded),
+                  const SizedBox(width: 24),
+                  _buildSocialBtn(context, Icons.code_rounded),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     'DON\'T HAVE AN ACCOUNT? ',
@@ -140,6 +302,37 @@ class SignInScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialBtn(
+    BuildContext context,
+    IconData icon, {
+    VoidCallback? ontap,
+    Widget? child,
+  }) {
+    const Color shadowDark = Color(0xFF0D0E0F);
+    const Color shadowLight = Color(0xFF272A2D);
+
+    return InkWell(
+      onTap: ontap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: MyColors.lightBlack,
+          shape: BoxShape.circle,
+          boxShadow: const [
+            BoxShadow(color: shadowDark, offset: Offset(8, 8), blurRadius: 16),
+            BoxShadow(
+              color: shadowLight,
+              offset: Offset(-8, -8),
+              blurRadius: 16,
+            ),
+          ],
+        ),
+        child: child,
       ),
     );
   }
