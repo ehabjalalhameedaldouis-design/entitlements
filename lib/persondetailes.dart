@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Persondetailes extends StatefulWidget {
@@ -20,6 +21,8 @@ class _PersondetailesState extends State<Persondetailes> {
   final formkeyamount = GlobalKey<FormState>();
   final formkeyeditdescription = GlobalKey<FormState>();
   final formkeyeditamount = GlobalKey<FormState>();
+  late final String _uid;
+  late final CollectionReference<Map<String, dynamic>> _recentTransactions;
 
   double _toSignedAmount(double amount, bool isDebt) {
     return isDebt ? amount : -amount;
@@ -33,6 +36,18 @@ class _PersondetailesState extends State<Persondetailes> {
     final oldSigned = _toSignedAmount(oldAmount, isDebt);
     final newSigned = _toSignedAmount(newAmount, isDebt);
     return newSigned - oldSigned;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final parts = widget.person.path.split('/');
+    final fallbackUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    _uid = parts.length > 1 ? parts[1] : fallbackUid;
+    _recentTransactions = FirebaseFirestore.instance
+        .collection('users_accounts')
+        .doc(_uid)
+        .collection('recent_transactions');
   }
 
   @override
@@ -133,9 +148,16 @@ class _PersondetailesState extends State<Persondetailes> {
                         onPressed: () async {
                           if (formkeyamount.currentState!.validate() &&
                               formkeydescription.currentState!.validate()) {
-                            double amount = debt
+                            final double amount = debt
                                 ? double.parse(amountController.text)
                                 : -double.parse(amountController.text);
+                            final double unsignedAmount = double.parse(
+                              amountController.text,
+                            );
+                            final txRef = widget.person
+                                .collection('transactions')
+                                .doc();
+                            final now = Timestamp.now();
                             WriteBatch batch = FirebaseFirestore.instance
                                 .batch();
                             batch.update(widget.person, {
@@ -143,12 +165,23 @@ class _PersondetailesState extends State<Persondetailes> {
                             });
 
                             batch.set(
-                              widget.person.collection('transactions').doc(),
+                              txRef,
                               {
-                                'amount': double.parse(amountController.text),
+                                'amount': unsignedAmount,
                                 'description': descriptionController.text,
                                 'isdebt': debt,
-                                'time': DateTime.now(),
+                                'time': now,
+                              },
+                            );
+                            batch.set(
+                              _recentTransactions.doc(txRef.id),
+                              {
+                                'amount': unsignedAmount,
+                                'description': descriptionController.text,
+                                'isdebt': debt,
+                                'time': now,
+                                'client_id': widget.person.id,
+                                'client_name': widget.name,
                               },
                             );
                             await batch.commit();
@@ -268,9 +301,11 @@ class _PersondetailesState extends State<Persondetailes> {
                                             Icons.edit,
                                             color: MyColors.darkYellow,
                                             size: 30,
-                                            semanticLabel: 'Edit transaction',
+                                            semanticLabel: 'edit_transaction',
                                           ),
-                                          title: Text('Edit transaction'),
+                                          title: Text(
+                                            getword(context, 'edit_transaction'),
+                                          ),
                                           onTap: () {
                                             Navigator.pop(context);
                                             showDialog(
@@ -416,6 +451,29 @@ class _PersondetailesState extends State<Persondetailes> {
                                                               'amount': newAmount,
                                                             },
                                                           );
+                                                          batch.set(
+                                                            _recentTransactions
+                                                                .doc(tran['id']),
+                                                            {
+                                                              'description':
+                                                                  descriptioneditController
+                                                                      .text,
+                                                              'amount':
+                                                                  newAmount,
+                                                              'isdebt':
+                                                                  isDebt,
+                                                              'time':
+                                                                  tran['time'],
+                                                              'client_id':
+                                                                  widget.person
+                                                                      .id,
+                                                              'client_name':
+                                                                  widget.name,
+                                                            },
+                                                            SetOptions(
+                                                              merge: true,
+                                                            ),
+                                                          );
                                                           batch.update(
                                                             widget.person,
                                                             {
@@ -452,26 +510,39 @@ class _PersondetailesState extends State<Persondetailes> {
                                             Icons.delete,
                                             color: MyColors.darkYellow,
                                             size: 30,
-                                            semanticLabel: 'Delete transaction',
+                                            semanticLabel: 'delete_transaction',
                                           ),
-                                          title: Text('Delete transaction'),
+                                          title: Text(
+                                            getword(
+                                              context,
+                                              'delete_transaction',
+                                            ),
+                                          ),
                                           onTap: () async {
                                             Navigator.pop(context);
                                             showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: Text(
-                                                  'Delete transaction',
+                                                  getword(
+                                                    context,
+                                                    'delete_transaction',
+                                                  ),
                                                 ),
                                                 content: Text(
-                                                  'Are you sure you want to delete this transaction?',
+                                                  getword(
+                                                    context,
+                                                    'confirm_delete_transaction',
+                                                  ),
                                                 ),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () {
                                                       Navigator.pop(context);
                                                     },
-                                                    child: Text('Cancel'),
+                                                    child: Text(
+                                                      getword(context, 'cancel'),
+                                                    ),
                                                   ),
                                                   TextButton(
                                                     onPressed: () async {
@@ -500,6 +571,11 @@ class _PersondetailesState extends State<Persondetailes> {
                                                             )
                                                             .doc(tran['id']),
                                                       );
+                                                      batch.delete(
+                                                        _recentTransactions.doc(
+                                                          tran['id'],
+                                                        ),
+                                                      );
                                                       await batch.commit();
                                                       if (context.mounted) {
                                                         Navigator.pop(context);
@@ -509,13 +585,18 @@ class _PersondetailesState extends State<Persondetailes> {
                                                         ).showSnackBar(
                                                           SnackBar(
                                                             content: Text(
-                                                              'Transaction deleted',
+                                                              getword(
+                                                                context,
+                                                                'transaction_deleted',
+                                                              ),
                                                             ),
                                                           ),
                                                         );
                                                       }
                                                     },
-                                                    child: Text('Delete'),
+                                                    child: Text(
+                                                      getword(context, 'delete'),
+                                                    ),
                                                   ),
                                                 ],
                                               ),

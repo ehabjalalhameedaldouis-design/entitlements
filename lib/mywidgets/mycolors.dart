@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 class MyColors {
-  static const darkYellow = Color.fromARGB(255, 168, 131, 20);
-  static const lightBlack = Color.fromARGB(255, 54, 44, 44);
-  static const red = Color.fromARGB(255, 238, 17, 17);
-  static const green = Color.fromARGB(255, 68, 180, 16);
-  static const background = Color.fromARGB(255, 112, 105, 105);
-  static const title = Color.fromARGB(255, 34, 28, 28);
-
+  static const darkYellow = Color(0xFF19E26A);
+  static const lightBlack = Color(0xFF0F2C22);
+  static const red = Color(0xFFFF5E5E);
+  static const green = Color(0xFF19E26A);
+  static const background = Color(0xFF061A13);
+  static const title = Color(0xFFE9FFF3);
 }

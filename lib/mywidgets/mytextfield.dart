@@ -10,7 +10,6 @@ class MyTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final bool isPassword;
   const MyTextField({
-    super.key,
     required this.hintText,
     this.iconsuf,
     this.iconpre,
@@ -18,6 +17,7 @@ class MyTextField extends StatelessWidget {
     this.isPassword = false,
     this.controller,
     required this.label,
+    super.key,
   });
 
   @override

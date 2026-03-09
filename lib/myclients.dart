@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/persondetailes.dart';
-import 'package:entitlements/services/clients_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -18,34 +18,37 @@ class _MyClientsState extends State<MyClients> {
   String searchName = '';
   final formkey = GlobalKey<FormState>();
   final editkey = GlobalKey<FormState>();
+  final CollectionReference users = FirebaseFirestore.instance.collection(
+    'users_accounts',
+  );
   final String uid = FirebaseAuth.instance.currentUser!.uid;
-  late final ClientsService clientsService;
 
   Future<void> addUser(String name, BuildContext context) {
-    return clientsService
-        .addClient(name)
+    final String normalizedName = name.trim().toLowerCase();
+    return users
+        .doc(uid)
+        .collection("My_Clients")
+        .add({
+          'full_name': normalizedName,
+          'created_at': FieldValue.serverTimestamp(),
+          'total_amount': 0,
+        })
         .then((value) {
           if (!context.mounted) return;
           setState(() {});
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("$name added successfully")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${name.trim()} ${getword(context, 'save')}')),
+          );
         })
         .catchError((error) {
           if (!context.mounted) return;
           setState(() {});
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to add client: $error")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
         });
   }
-
-  @override
-  void initState() {
-    super.initState();
-    clientsService = ClientsService(uid: uid);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +121,13 @@ class _MyClientsState extends State<MyClients> {
           ),
             Expanded(
               child: StreamBuilder(
-                stream: clientsService.getClientsQuery(searchName).snapshots(),
+                stream: users
+                    .doc(uid)
+                    .collection("My_Clients")
+                    .orderBy('full_name')
+                    .where('full_name', isGreaterThanOrEqualTo: searchName)
+                    .where('full_name', isLessThanOrEqualTo: '$searchName\uf8ff')
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -159,7 +168,10 @@ class _MyClientsState extends State<MyClients> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => Persondetailes(
-                                person: clientsService.clientDoc(person.id),
+                                person: users
+                                    .doc(uid)
+                                    .collection("My_Clients")
+                                    .doc(person.id),
                                 name: person['full_name'],
                               ),
                             ),
@@ -178,9 +190,9 @@ class _MyClientsState extends State<MyClients> {
                                       Icons.edit,
                                       color: MyColors.darkYellow,
                                       size: 30,
-                                      semanticLabel: 'Edit person',
+                                      semanticLabel: 'edit_person',
                                     ),
-                                    title: Text('Edit person'),
+                                    title: Text(getword(context, 'edit_person')),
                                     onTap: () {
                                       Navigator.pop(context);
                                       showDialog(
@@ -231,11 +243,20 @@ class _MyClientsState extends State<MyClients> {
                                                 onPressed: () async {
                                                   if (editkey.currentState!
                                                       .validate()) {
-                                                    await clientsService
-                                                        .updateClientName(
-                                                          person.id,
-                                                          editController.text,
-                                                        );
+                                                    final String normalizedName =
+                                                        editController.text
+                                                            .trim()
+                                                            .toLowerCase();
+                                                    users
+                                                        .doc(uid)
+                                                        .collection(
+                                                          "My_Clients",
+                                                        )
+                                                        .doc(person.id)
+                                                        .update({
+                                                          'full_name':
+                                                              normalizedName,
+                                                        });
                                                     if (!context.mounted) return;
                                                     Navigator.pop(context);
                                                     ScaffoldMessenger.of(
@@ -243,7 +264,10 @@ class _MyClientsState extends State<MyClients> {
                                                     ).showSnackBar(
                                                       SnackBar(
                                                         content: Text(
-                                                          'Person updated',
+                                                          getword(
+                                                            context,
+                                                            'person_updated',
+                                                          ),
                                                         ),
                                                       ),
                                                     );
@@ -264,30 +288,53 @@ class _MyClientsState extends State<MyClients> {
                                       Icons.delete,
                                       color: MyColors.darkYellow,
                                       size: 30,
-                                      semanticLabel: 'Delete person',
+                                      semanticLabel: 'delete_person',
                                     ),
-                                    title: Text('Delete person'),
+                                    title: Text(getword(context, 'delete_person')),
                                     onTap: () async {
                                       Navigator.pop(context);
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(
-                                          title: Text('Delete person'),
+                                          title: Text(
+                                            getword(context, 'delete_person'),
+                                          ),
                                           content: Text(
-                                            'Are you sure you want to delete this person?',
+                                            getword(
+                                              context,
+                                              'confirm_delete_person',
+                                            ),
                                           ),
                                           actions: [
                                             TextButton(
                                               onPressed: () =>
                                                   Navigator.pop(context),
-                                              child: Text('Cancel'),
+                                              child: Text(getword(context, 'cancel')),
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                await clientsService
-                                                    .deleteClientWithTransactions(
-                                                      person.id,
-                                                    );
+                                                WriteBatch batch =
+                                                    FirebaseFirestore.instance
+                                                        .batch();
+                                                var clientDoc = users
+                                                    .doc(uid)
+                                                    .collection("My_Clients")
+                                                    .doc(person.id);
+                                                var transactions =
+                                                    await clientDoc
+                                                        .collection(
+                                                          "transactions",
+                                                        )
+                                                        .get();
+                                                for (var transaction
+                                                    in transactions.docs) {
+                                                  batch.delete(
+                                                    transaction.reference,
+                                                  );
+                                                }
+
+                                                batch.delete(clientDoc);
+                                                await batch.commit();
                                                 if (!context.mounted) return;
                                                 Navigator.pop(context);
                                                 ScaffoldMessenger.of(
@@ -295,12 +342,15 @@ class _MyClientsState extends State<MyClients> {
                                                 ).showSnackBar(
                                                   SnackBar(
                                                     content: Text(
-                                                      'Person deleted',
+                                                      getword(
+                                                        context,
+                                                        'person_deleted',
+                                                      ),
                                                     ),
                                                   ),
                                                 );
                                               },
-                                              child: Text('Delete'),
+                                              child: Text(getword(context, 'delete')),
                                             ),
                                           ],
                                         ),

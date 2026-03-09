@@ -13,7 +13,7 @@ void main() async {
   await GoogleSignIn.instance.initialize(
     serverClientId: '849413315878-9439fpb3k2goffpflb5us7qonaeoqg9t.apps.googleusercontent.com',
   );
-  runApp(DebtManager(language: 'en'));
+  runApp(DebtManager(language: 'ar'));
 }
 
 class DebtManager extends StatefulWidget {
@@ -34,8 +34,8 @@ class _DebtManagerState extends State<DebtManager> {
 
   @override
   void initState() {
-    super.initState();
     locale = Locale(widget.language);
+    super.initState();
   }
 
   void setLocale(Locale newLocale) {
@@ -47,10 +47,43 @@ class _DebtManagerState extends State<DebtManager> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) {
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF052217), Color.fromARGB(255, 33, 134, 15), Color.fromARGB(255, 137, 238, 21)],
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       theme: ThemeData(
-        appBarTheme: AppBarTheme(backgroundColor: MyColors.background),
-        scaffoldBackgroundColor: MyColors.background,
-        primaryColor: MyColors.darkYellow,
+        brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(
+          titleTextStyle: TextStyle(
+            color: Color(0xFFE9FFF3),
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          ),
+          backgroundColor: Color(0xFF061A13),
+          elevation: 4,
+        ),
+        scaffoldBackgroundColor: Colors.transparent,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: MyColors.darkYellow,
+          brightness: Brightness.dark,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF0E3A2B),
+          contentTextStyle: const TextStyle(
+            color: Color(0xFFE9FFF3),
+            fontWeight: FontWeight.w600,
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
         textSelectionTheme: TextSelectionThemeData(
           selectionHandleColor: MyColors.darkYellow,
           cursorColor: MyColors.darkYellow,
@@ -61,7 +94,6 @@ class _DebtManagerState extends State<DebtManager> {
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('ar', 'SA'),
-        Locale('zh', 'CN'),
       ],
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
