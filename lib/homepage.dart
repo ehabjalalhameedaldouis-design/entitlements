@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/myclients.dart';
+import 'package:entitlements/mywidgets/myappbar.dart';
+import 'package:entitlements/mywidgets/mycard.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:entitlements/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -52,20 +54,15 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _openAddTransactionSelector() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => _AddTransactionClientSelector(
-          uid: uid,
-          users: users,
-        ),
-      ),
+    _goToTab(1);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(getword(context, 'choose_client_first'))),
     );
   }
 
   void _showLatestNotifications() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(getword(context, 'no_new_notifications') )),
+      SnackBar(content: Text(getword(context, 'no_new_notifications'))),
     );
   }
 
@@ -115,67 +112,6 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onOpenClients;
   final VoidCallback onOpenAddTransaction;
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Object?>>(
-      stream: stream,
-      builder: (context, snapshot) {
-        final docs = snapshot.hasData
-            ? snapshot.data!.docs
-            : <QueryDocumentSnapshot<Object?>>[];
-
-        return SafeArea(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xF0052217),
-                  Color(0xE60A2F21),
-                  Color(0xE00E3827),
-                ],
-              ),
-            ),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
-              children: [
-                _GreetingHeader(
-                  profileImageBytes: profileImageBytes,
-                  onTapProfileImage: onTapProfileImage,
-                  onShowNotifications: onShowNotifications,
-                ),
-                const SizedBox(height: 14),
-                _HeroBalanceCard(docs: docs),
-                const SizedBox(height: 12),
-                _QuickActionsRow(
-                  onOpenClients: onOpenClients,
-                  onOpenAddTransaction: onOpenAddTransaction,
-                ),
-                const SizedBox(height: 12),
-                _RecentTransactionsCard(
-                  uid: uid,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _GreetingHeader extends StatelessWidget {
-  const _GreetingHeader({
-    required this.profileImageBytes,
-    required this.onTapProfileImage,
-    required this.onShowNotifications,
-  });
-
-  final Uint8List? profileImageBytes;
-  final VoidCallback onTapProfileImage;
-  final VoidCallback onShowNotifications;
-
   String _greeting(BuildContext context) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -190,63 +126,69 @@ class _GreetingHeader extends StatelessWidget {
     final displayName = (user?.displayName ?? '').trim();
     final fallbackName = user?.email ?? 'User';
     final name = displayName.isNotEmpty ? displayName : fallbackName;
+    return StreamBuilder<QuerySnapshot<Object?>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        final docs = snapshot.hasData
+            ? snapshot.data!.docs
+            : <QueryDocumentSnapshot<Object?>>[];
 
-    ImageProvider<Object>? imageProvider;
-    if (profileImageBytes != null) {
-      imageProvider = MemoryImage(profileImageBytes!);
-    } else if ((user?.photoURL ?? '').isNotEmpty) {
-      imageProvider = NetworkImage(user!.photoURL!);
-    }
-
-    return Row(
-      children: [
-        InkWell(
-          onTap: onTapProfileImage,
-          borderRadius: BorderRadius.circular(22),
-          child: CircleAvatar(
-            radius: 22,
-            backgroundColor: const Color(0xFFCBFFE4),
-            backgroundImage: imageProvider,
-            child: imageProvider == null
-                ? const Icon(Icons.person, color: MyColors.lightBlack)
-                : null,
+        return Scaffold(
+          appBar: AppBar(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _greeting(context),
+                  style: TextStyle(
+            color: Color(0xFFE9FFF3),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _greeting(context),
-                style: TextStyle(
-                  color: MyColors.title.withValues(alpha: 0.85),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+            color: Color(0xFFE9FFF3),
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+                ),
+              ],
+            ),
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      elevation: 8,
+      shadowColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
+            actions: [
+              IconButton(
+                onPressed: onShowNotifications,
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: MyColors.darkYellow,
                 ),
               ),
             ],
           ),
-        ),
-        IconButton(
-          onPressed: onShowNotifications,
-          icon: const Icon(
-            Icons.notifications_none_rounded,
-            color: MyColors.darkYellow,
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 120),
+              children: [
+                _HeroBalanceCard(docs: docs),
+                const SizedBox(height: 12),
+                _QuickActionsRow(
+                  onOpenClients: onOpenClients,
+                  onOpenAddTransaction: onOpenAddTransaction,
+                ),
+                const SizedBox(height: 12),
+                _RecentTransactionsCard(uid: uid),
+              ],
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -382,7 +324,11 @@ class _QuickActionCard extends StatelessWidget {
           color: const Color(0x991F6E4F),
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -409,9 +355,7 @@ class _QuickActionCard extends StatelessWidget {
 }
 
 class _RecentTransactionsCard extends StatelessWidget {
-  const _RecentTransactionsCard({
-    required this.uid,
-  });
+  const _RecentTransactionsCard({required this.uid});
 
   final String uid;
 
@@ -479,12 +423,12 @@ class _RecentTransactionsCard extends StatelessWidget {
                   final double amount = (tx['amount'] as num?)?.toDouble() ?? 0;
                   final Timestamp? ts = tx['time'] as Timestamp?;
                   final DateTime? time = ts?.toDate();
-                  final String description =
-                      (tx['description'] ?? '').toString();
+                  final String description = (tx['description'] ?? '')
+                      .toString();
 
                   final Color color = isDebt
-                      ? const Color(0xFFFFD6D6)
-                      : const Color(0xFFCEFFE5);
+                      ? const Color.fromARGB(255, 220, 55, 55)
+                      : const Color.fromARGB(255, 56, 196, 121);
                   final String dateText = time == null
                       ? ''
                       : '${time.day}/${time.month}/${time.year}';
@@ -507,7 +451,7 @@ class _RecentTransactionsCard extends StatelessWidget {
                       style: TextStyle(color: color.withValues(alpha: 0.8)),
                     ),
                     trailing: Text(
-                      '${isDebt ? '-' : '+'}${amount.toStringAsFixed(2)}',
+                      amount.toStringAsFixed(2),
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.bold,
@@ -564,10 +508,7 @@ class _StatChip extends StatelessWidget {
 }
 
 class _HomeBottomBar extends StatelessWidget {
-  const _HomeBottomBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _HomeBottomBar({required this.currentIndex, required this.onTap});
 
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -577,12 +518,7 @@ class _HomeBottomBar extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xE60A2A1E),
-        border: Border(
-          top: BorderSide(
-            color: Color(0x991F6E4F),
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: Color(0x991F6E4F), width: 1)),
       ),
       padding: const EdgeInsets.only(bottom: 8, top: 6),
       child: SafeArea(
@@ -665,87 +601,6 @@ class _BottomItem extends StatelessWidget {
   }
 }
 
-class _AddTransactionClientSelector extends StatelessWidget {
-  const _AddTransactionClientSelector({
-    required this.uid,
-    required this.users,
-  });
-
-  final String uid;
-  final CollectionReference users;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MyColors.background,
-      appBar: AppBar(
-        backgroundColor: MyColors.background,
-        title: Text(
-          getword(context, 'add_a_new_transaction'),
-          style: const TextStyle(color: MyColors.title),
-        ),
-      ),
-      body: StreamBuilder<QuerySnapshot<Object?>>(
-        stream: users
-            .doc(uid)
-            .collection('My_Clients')
-            .orderBy('full_name')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text(
-                getword(context, 'no_clients_found'),
-                style: const TextStyle(color: MyColors.title),
-              ),
-            );
-          }
-
-          final clients = snapshot.data!.docs;
-          return ListView.builder(
-            padding: const EdgeInsets.all(10),
-            itemCount: clients.length,
-            itemBuilder: (context, index) {
-              final client = clients[index];
-              return Card(
-                color: const Color(0xFF1F6E4F),
-                child: ListTile(
-                  leading: const Icon(Icons.person, color: Color(0xFFCEFFE5)),
-                  title: Text(
-                    client['full_name'].toString(),
-                    style: const TextStyle(color: Color(0xFFE9FFF3)),
-                  ),
-                  subtitle: Text(
-                    '${client['total_amount']}',
-                    style: const TextStyle(color: Color(0xFFB6E8CF)),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Persondetailes(
-                          person: users
-                              .doc(uid)
-                              .collection('My_Clients')
-                              .doc(client.id),
-                          name: client['full_name'].toString(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _AnalysisPlaceholder extends StatelessWidget {
   const _AnalysisPlaceholder({required this.onClose});
 
@@ -753,33 +608,41 @@ class _AnalysisPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        color: const Color(0x991F6E4F),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.auto_graph_rounded,
-                size: 42,
-                color: MyColors.darkYellow,
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'قسم التحليل قيد التطوير',
-                style: TextStyle(
-                  color: Color(0xFFE9FFF3),
-                  fontWeight: FontWeight.w700,
+    return Scaffold(
+      appBar: Myappbar(
+        widget: Text(
+          getword(context, "analysis"),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+      ),
+      body: Center(
+        child: Card(
+          color: const Color(0x991F6E4F),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.auto_graph_rounded,
+                  size: 42,
+                  color: MyColors.darkYellow,
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: onClose,
-                child: const Text('العودة للرئيسية'),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Text(
+                  getword(context, 'analysis_coming_soon'),
+                  style: TextStyle(
+                    color: Color(0xFFE9FFF3),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: onClose,
+                  child: Text(getword(context, 'come back to homepage')),
+                ),
+              ],
+            ),
           ),
         ),
       ),

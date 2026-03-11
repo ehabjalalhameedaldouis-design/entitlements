@@ -37,7 +37,9 @@ class _MyClientsState extends State<MyClients> {
           if (!context.mounted) return;
           setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${name.trim()} ${getword(context, 'save')}')),
+            SnackBar(
+              content: Text('${name.trim()} ${getword(context, 'save')}'),
+            ),
           );
         })
         .catchError((error) {
@@ -48,7 +50,7 @@ class _MyClientsState extends State<MyClients> {
           ).showSnackBar(SnackBar(content: Text(error.toString())));
         });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,7 +107,12 @@ class _MyClientsState extends State<MyClients> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      appBar: Myappbar(title: "clients"),
+      appBar: Myappbar(
+        widget: Text(
+          getword(context, 'my_clients'),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+      ),
       body: Column(
         children: [
           SizedBox(height: 10),
@@ -119,256 +126,273 @@ class _MyClientsState extends State<MyClients> {
               });
             },
           ),
-            Expanded(
-              child: StreamBuilder(
-                stream: users
-                    .doc(uid)
-                    .collection("My_Clients")
-                    .orderBy('full_name')
-                    .where('full_name', isGreaterThanOrEqualTo: searchName)
-                    .where('full_name', isLessThanOrEqualTo: '$searchName\uf8ff')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text(getword(context, 'no_clients_found')));
-                  }
-                    List people = snapshot.data!.docs;
-                  return ListView.builder(
-                itemCount: people.length,
-                itemBuilder: (context, index) {
-                  final person = people[index];
-                  return Card(
-                    color: MyColors.lightBlack,
-                    elevation: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ListTile(
-                        leading: Icon(Icons.person, color: MyColors.darkYellow),
-                        title: Text(
-                          person['full_name'],
-                          style: TextStyle(
+          Expanded(
+            child: StreamBuilder(
+              stream: users
+                  .doc(uid)
+                  .collection("My_Clients")
+                  .orderBy('full_name')
+                  .where('full_name', isGreaterThanOrEqualTo: searchName)
+                  .where('full_name', isLessThanOrEqualTo: '$searchName\uf8ff')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(getword(context, 'no_clients_found')),
+                  );
+                }
+                List people = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: people.length,
+                  itemBuilder: (context, index) {
+                    final person = people[index];
+                    return Card(
+                      color: MyColors.lightBlack,
+                      elevation: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.person,
                             color: MyColors.darkYellow,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        trailing: Text(
-                          "${person['total_amount']} ${getword(context, 'currency')}",
-                          style: TextStyle(
-                            color: MyColors.darkYellow,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Persondetailes(
-                                person: users
-                                    .doc(uid)
-                                    .collection("My_Clients")
-                                    .doc(person.id),
-                                name: person['full_name'],
-                              ),
+                          title: Text(
+                            person['full_name'],
+                            style: TextStyle(
+                              color: MyColors.darkYellow,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                          setState(() {});
-                        },
-                        onLongPress: () {
-                          showModalBottomSheet(
-                            context: context,
-                            backgroundColor: MyColors.background,
-                            builder: (context) {
-                              return Column(
-                                children: [
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.edit,
-                                      color: MyColors.darkYellow,
-                                      size: 30,
-                                      semanticLabel: 'edit_person',
-                                    ),
-                                    title: Text(getword(context, 'edit_person')),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          TextEditingController editController =
-                                              TextEditingController(
-                                                text: person['full_name'],
-                                              );
-                                          return AlertDialog(
-                                            title: Text(
-                                              getword(context, 'edit_name'),
-                                            ),
-                                            content: Form(
-                                              key: editkey,
-                                              child: TextFormField(
-                                                controller: editController,
-                                                decoration: InputDecoration(
-                                                  border: OutlineInputBorder(),
-                                                  hintText: getword(
-                                                    context,
-                                                    'enter_person_name',
+                          ),
+                          trailing: Text(
+                            "${person['total_amount']} ${getword(context, 'currency')}",
+                            style: TextStyle(
+                              color: MyColors.darkYellow,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Persondetailes(
+                                  person: users
+                                      .doc(uid)
+                                      .collection("My_Clients")
+                                      .doc(person.id),
+                                  name: person['full_name'],
+                                ),
+                              ),
+                            );
+                            setState(() {});
+                          },
+                          onLongPress: () {
+                            showModalBottomSheet(
+                              context: context,
+                              backgroundColor: MyColors.background,
+                              builder: (context) {
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      leading: Icon(
+                                        Icons.edit,
+                                        color: MyColors.darkYellow,
+                                        size: 30,
+                                        semanticLabel: 'edit_person',
+                                      ),
+                                      title: Text(
+                                        getword(context, 'edit_person'),
+                                      ),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            TextEditingController
+                                            editController =
+                                                TextEditingController(
+                                                  text: person['full_name'],
+                                                );
+                                            return AlertDialog(
+                                              title: Text(
+                                                getword(context, 'edit_name'),
+                                              ),
+                                              content: Form(
+                                                key: editkey,
+                                                child: TextFormField(
+                                                  controller: editController,
+                                                  decoration: InputDecoration(
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                    hintText: getword(
+                                                      context,
+                                                      'enter_person_name',
+                                                    ),
+                                                  ),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return getword(
+                                                        context,
+                                                        'please_enter_a_name',
+                                                      );
+                                                    }
+                                                    if (!RegExp(
+                                                      r'^[\p{L}\s]+$',
+                                                      unicode: true,
+                                                    ).hasMatch(value)) {
+                                                      return getword(
+                                                        context,
+                                                        'please_enter_a_valid_name',
+                                                      );
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    if (editkey.currentState!
+                                                        .validate()) {
+                                                      final String
+                                                      normalizedName =
+                                                          editController.text
+                                                              .trim()
+                                                              .toLowerCase();
+                                                      users
+                                                          .doc(uid)
+                                                          .collection(
+                                                            "My_Clients",
+                                                          )
+                                                          .doc(person.id)
+                                                          .update({
+                                                            'full_name':
+                                                                normalizedName,
+                                                          });
+                                                      if (!context.mounted) return;
+                                                      Navigator.pop(context);
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            getword(
+                                                              context,
+                                                              'person_updated',
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    getword(context, 'save'),
                                                   ),
                                                 ),
-                                                validator: (value) {
-                                                  if (value == null ||
-                                                      value.isEmpty) {
-                                                    return getword(
-                                                      context,
-                                                      'please_enter_a_name',
-                                                    );
-                                                  }
-                                                  if (!RegExp(
-                                                    r'^[\p{L}\s]+$',
-                                                    unicode: true,
-                                                  ).hasMatch(value)) {
-                                                    return getword(
-                                                      context,
-                                                      'please_enter_a_valid_name',
-                                                    );
-                                                  }
-                                                  return null;
-                                                },
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: Icon(
+                                        Icons.delete,
+                                        color: MyColors.darkYellow,
+                                        size: 30,
+                                        semanticLabel: 'delete_person',
+                                      ),
+                                      title: Text(
+                                        getword(context, 'delete_person'),
+                                      ),
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text(
+                                              getword(context, 'delete_person'),
+                                            ),
+                                            content: Text(
+                                              getword(
+                                                context,
+                                                'confirm_delete_person',
                                               ),
                                             ),
                                             actions: [
                                               TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: Text(
+                                                  getword(context, 'cancel'),
+                                                ),
+                                              ),
+                                              TextButton(
                                                 onPressed: () async {
-                                                  if (editkey.currentState!
-                                                      .validate()) {
-                                                    final String normalizedName =
-                                                        editController.text
-                                                            .trim()
-                                                            .toLowerCase();
-                                                    users
-                                                        .doc(uid)
-                                                        .collection(
-                                                          "My_Clients",
-                                                        )
-                                                        .doc(person.id)
-                                                        .update({
-                                                          'full_name':
-                                                              normalizedName,
-                                                        });
-                                                    if (!context.mounted) return;
-                                                    Navigator.pop(context);
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          getword(
-                                                            context,
-                                                            'person_updated',
-                                                          ),
-                                                        ),
-                                                      ),
+                                                  WriteBatch batch =
+                                                      FirebaseFirestore.instance
+                                                          .batch();
+                                                  var clientDoc = users
+                                                      .doc(uid)
+                                                      .collection("My_Clients")
+                                                      .doc(person.id);
+                                                  var transactions =
+                                                      await clientDoc
+                                                          .collection(
+                                                            "transactions",
+                                                          )
+                                                          .get();
+                                                  for (var transaction
+                                                      in transactions.docs) {
+                                                    batch.delete(
+                                                      transaction.reference,
                                                     );
                                                   }
+
+                                                  batch.delete(clientDoc);
+                                                  await batch.commit();
+                                                  if (!context.mounted) return;
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        getword(
+                                                          context,
+                                                          'person_deleted',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
                                                 },
                                                 child: Text(
-                                                  getword(context, 'save'),
+                                                  getword(context, 'delete'),
                                                 ),
                                               ),
                                             ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.delete,
-                                      color: MyColors.darkYellow,
-                                      size: 30,
-                                      semanticLabel: 'delete_person',
+                                          ),
+                                        );
+                                      },
                                     ),
-                                    title: Text(getword(context, 'delete_person')),
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text(
-                                            getword(context, 'delete_person'),
-                                          ),
-                                          content: Text(
-                                            getword(
-                                              context,
-                                              'confirm_delete_person',
-                                            ),
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: Text(getword(context, 'cancel')),
-                                            ),
-                                            TextButton(
-                                              onPressed: () async {
-                                                WriteBatch batch =
-                                                    FirebaseFirestore.instance
-                                                        .batch();
-                                                var clientDoc = users
-                                                    .doc(uid)
-                                                    .collection("My_Clients")
-                                                    .doc(person.id);
-                                                var transactions =
-                                                    await clientDoc
-                                                        .collection(
-                                                          "transactions",
-                                                        )
-                                                        .get();
-                                                for (var transaction
-                                                    in transactions.docs) {
-                                                  batch.delete(
-                                                    transaction.reference,
-                                                  );
-                                                }
-
-                                                batch.delete(clientDoc);
-                                                await batch.commit();
-                                                if (!context.mounted) return;
-                                                Navigator.pop(context);
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      getword(
-                                                        context,
-                                                        'person_deleted',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              child: Text(getword(context, 'delete')),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-                },              ),
+                    );
+                  },
+                );
+              },
             ),
+          ),
         ],
       ),
     );

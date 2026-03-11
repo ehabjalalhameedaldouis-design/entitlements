@@ -100,7 +100,10 @@ class _SettingState extends State<Setting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Myappbar(title: "settings"),
+      appBar: Myappbar(widget: Text(
+          getword(context,"settings"),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),),
       body: ListView(
         padding: const EdgeInsets.all(14),
         children: [

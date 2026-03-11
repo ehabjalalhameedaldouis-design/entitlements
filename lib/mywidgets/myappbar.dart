@@ -3,8 +3,8 @@ import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 
 class Myappbar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  const Myappbar({super.key, required this.title});
+  final Widget widget;
+  const Myappbar({super.key, required this.widget});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -12,10 +12,7 @@ class Myappbar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(
-        getword(context, title),
-        style: Theme.of(context).appBarTheme.titleTextStyle,
-      ),
+      title: widget,
       centerTitle: true,
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       elevation: 8,

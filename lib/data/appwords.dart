@@ -78,6 +78,7 @@ class AppWords {
       'edit_name': 'Edit name',
       'no_clients_found': 'No clients found',
       'no_net_balance': 'No net balance',
+      'choose_client_first': 'Please choose a client first',
       'edit_person': 'Edit person',
       'delete_person': 'Delete person',
       'confirm_delete_person': 'Are you sure you want to delete this person?',
@@ -92,6 +93,9 @@ class AppWords {
       'failed_pick_image' : 'Failed to pick image',
       'good_morning': 'Good morning',
       'good_evening': 'Good evening',
+      'analysis': 'Analysis',
+      'analysis_coming_soon': 'Analysis section coming soon',
+      'come back to homepage': 'Come back to homepage',
     },
     'ar': {
       'data_log': 'سجل البيانات',
@@ -168,6 +172,7 @@ class AppWords {
       'edit_name': 'تعديل الاسم',
       'no_clients_found': 'لا يوجد عملاء',
       'no_net_balance': 'لا يوجد صافي رصيد',
+      'choose_client_first': 'يرجى اختيار العميل أولاً',
       'edit_person': 'تعديل العميل',
       'delete_person': 'حذف العميل',
       'confirm_delete_person': 'هل أنت متأكد من حذف هذا العميل؟',
@@ -181,6 +186,9 @@ class AppWords {
       'failed_pick_image' : 'حدث خطأ أثناء اختيار الصورة',
       'good_morning': 'صباح الخير',
       'good_evening': 'مساء الخير',
+      'analysis': 'التحليل',
+      'analysis_coming_soon': 'قسم التحليل قيد التطوير',
+      'come back to homepage': 'العودة إلى الصفحة الرئيسية',
     },
   };
 }

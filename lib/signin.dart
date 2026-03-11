@@ -70,7 +70,10 @@ class _SignInScreenState extends State<SignInScreen> {
     const Color shadowLight = Color(0xFF272A2D);
 
     return Scaffold(
-      appBar: Myappbar(title: "sign_in"),
+      appBar: Myappbar(widget: Text(
+          getword(context,"sign_in"),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),),
 
       body: SafeArea(
         child: SingleChildScrollView(

@@ -203,7 +203,10 @@ class _PersondetailesState extends State<Persondetailes> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
-      appBar: Myappbar(title: widget.name),
+      appBar: Myappbar(widget: Text(
+          getword(context, widget.name),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),),
 
       body: SizedBox(
         width: double.infinity,
