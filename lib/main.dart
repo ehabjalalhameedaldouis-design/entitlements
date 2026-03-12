@@ -1,3 +1,4 @@
+import 'package:entitlements/firebase_options.dart';
 import 'package:entitlements/signin.dart';
 import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,11 +8,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await GoogleSignIn.instance.initialize(
-    serverClientId: '849413315878-9439fpb3k2goffpflb5us7qonaeoqg9t.apps.googleusercontent.com',
+    serverClientId: DefaultFirebaseOptions.currentPlatform.androidClientId,
   );
   runApp(DebtManager(language: 'ar'));
 }

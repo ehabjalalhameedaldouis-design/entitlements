@@ -80,7 +80,6 @@ class _HomepageState extends State<Homepage> {
         onOpenClients: () => _goToTab(1),
         onOpenAddTransaction: _openAddTransactionSelector,
       ),
-      _AnalysisPlaceholder(onClose: () => _goToTab(2)),
     ];
 
     return Scaffold(
@@ -544,12 +543,6 @@ class _HomeBottomBar extends StatelessWidget {
               selected: currentIndex == 2,
               onTap: () => onTap(2),
             ),
-            _BottomItem(
-              label: getword(context, 'analysis'),
-              icon: Icons.auto_graph_rounded,
-              selected: currentIndex == 3,
-              onTap: () => onTap(3),
-            ),
           ],
         ),
       ),
@@ -595,55 +588,6 @@ class _BottomItem extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnalysisPlaceholder extends StatelessWidget {
-  const _AnalysisPlaceholder({required this.onClose});
-
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Myappbar(
-        widget: Text(
-          getword(context, "analysis"),
-          style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),
-      ),
-      body: Center(
-        child: Card(
-          color: const Color(0x991F6E4F),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.auto_graph_rounded,
-                  size: 42,
-                  color: MyColors.darkYellow,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  getword(context, 'analysis_coming_soon'),
-                  style: TextStyle(
-                    color: Color(0xFFE9FFF3),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: onClose,
-                  child: Text(getword(context, 'come back to homepage')),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
