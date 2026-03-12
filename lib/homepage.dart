@@ -545,7 +545,7 @@ class _HomeBottomBar extends StatelessWidget {
               onTap: () => onTap(2),
             ),
             _BottomItem(
-              label: 'التحليل',
+              label: getword(context, 'analysis'),
               icon: Icons.auto_graph_rounded,
               selected: currentIndex == 3,
               onTap: () => onTap(3),
