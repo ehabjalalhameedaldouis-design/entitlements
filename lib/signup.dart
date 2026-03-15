@@ -1,12 +1,12 @@
 import 'package:entitlements/homepage.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -19,6 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController emailAddress = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController fullName = TextEditingController();
+  bool _agreedToPolicy = false;
 
   @override
   void dispose() {
@@ -31,32 +32,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    const Color shadowDark = Color(0xFF0D0E0F);
-    const Color shadowLight = Color(0xFF272A2D);
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final shadowDark = Colors.black.withValues(alpha: 0.6);
+    final shadowLight = surface.withValues(alpha: 0.5);
 
     return Scaffold(
-      appBar: Myappbar(widget: Text(
-          getword(context,"sign_up"),
+      appBar: Myappbar(
+        widget: Text(
+          getword(context, "sign_up"),
           style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               const SizedBox(height: 5),
               Text(
                 getword(context, 'signup_tagline'),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: MyColors.darkYellow,
+                style: TextStyle(
+                  color: primary,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(height: 8),
-
               MyTextField(
                 label: getword(context, 'full_name'),
                 iconpre: Icons.person_rounded,
@@ -77,9 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 isPassword: true,
                 controller: password,
               ),
-
               const SizedBox(height: 40),
-
               GestureDetector(
                 onTap: () async {
                   final String fullNameValue = fullName.text.trim();
@@ -94,9 +97,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     );
                     return;
                   }
+                  if (!_agreedToPolicy) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(getword(context, 'please_agree_to_policy')),
+                      ),
+                    );
+                    return;
+                  }
                   if (emailValue.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(getword(context, 'please_enter_email'))),
+                      SnackBar(
+                        content: Text(getword(context, 'please_enter_email')),
+                      ),
                     );
                     return;
                   }
@@ -132,8 +145,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         );
                     if (!context.mounted) return;
 
-                    final user =
-                        FirebaseAuth.instance.currentUser ?? creds.user;
+                    final user = FirebaseAuth.instance.currentUser ?? creds.user;
 
                     if (user != null) {
                       await user.updateDisplayName(fullNameValue);
@@ -165,11 +177,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       await FirebaseAuth.instance.signOut();
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(getword(context, 'verify_before_signin'))),
+                        SnackBar(
+                          content: Text(getword(context, 'verify_before_signin')),
+                        ),
                       );
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignInScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
                       );
                     }
                   } on FirebaseAuthException catch (e) {
@@ -187,10 +203,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: MyColors.lightBlack,
+                    color: surface,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      BoxShadow(color: MyColors.darkYellow, blurRadius: 20),
+                      BoxShadow(color: primary, blurRadius: 20),
                       BoxShadow(
                         color: shadowDark,
                         offset: const Offset(6, 6),
@@ -207,7 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Text(
                       getword(context, 'create_account').toUpperCase(),
                       style: TextStyle(
-                        color: MyColors.darkYellow,
+                        color: primary,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.5,
@@ -216,29 +232,75 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
+              Row(
+                children: [
+                  Checkbox(
+                    value: _agreedToPolicy,
+                    activeColor: primary,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreedToPolicy = value ?? false;
+                      });
+                    },
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final Uri url = Uri.parse(
+                          'https://ehabjalalhameedaldouis-design.github.io/entitlements/',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: onSurface,
+                            fontSize: 13,
+                          ),
+                          children: [
+                            TextSpan(text: getword(context, 'agree_to')),
+                            TextSpan(
+                              text: getword(context, 'privacy_policy'),
+                              style: TextStyle(
+                                color: primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     getword(context, 'already_have_account'),
-                    style: const TextStyle(color: MyColors.lightBlack, fontSize: 14),
+                    style: TextStyle(color: onSurface, fontSize: 14),
                     textAlign: isArabic ? TextAlign.right : TextAlign.left,
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignInScreen(),
-                      ));
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                      );
                     },
                     child: Text(
                       getword(context, 'sign_in'),
                       style: TextStyle(
-                        color: MyColors.darkYellow,
+                        color: primary,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),

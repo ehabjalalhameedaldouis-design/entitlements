@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -53,10 +52,14 @@ class _MyClientsState extends State<MyClients> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+    final background = Theme.of(context).scaffoldBackgroundColor;
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: MyColors.lightBlack,
-        shape: StadiumBorder(),
+        backgroundColor: surface,
+        shape: const StadiumBorder(),
         onPressed: () {
           showDialog(
             context: context,
@@ -69,7 +72,7 @@ class _MyClientsState extends State<MyClients> {
                   child: TextFormField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       hintText: getword(context, 'enter_person_name'),
                     ),
                     validator: (value) {
@@ -102,11 +105,9 @@ class _MyClientsState extends State<MyClients> {
             },
           );
         },
-        child: Icon(Icons.add, color: MyColors.darkYellow, size: 30),
+        child: Icon(Icons.add, color: primary, size: 30),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
       appBar: Myappbar(
         widget: Text(
           getword(context, 'my_clients'),
@@ -115,7 +116,7 @@ class _MyClientsState extends State<MyClients> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           MyTextField(
             label: getword(context, 'search'),
             hintText: getword(context, 'search'),
@@ -137,7 +138,7 @@ class _MyClientsState extends State<MyClients> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
@@ -150,19 +151,16 @@ class _MyClientsState extends State<MyClients> {
                   itemBuilder: (context, index) {
                     final person = people[index];
                     return Card(
-                      color: MyColors.lightBlack,
+                      color: surface,
                       elevation: 8,
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: ListTile(
-                          leading: Icon(
-                            Icons.person,
-                            color: MyColors.darkYellow,
-                          ),
+                          leading: Icon(Icons.person, color: primary),
                           title: Text(
                             person['full_name'],
                             style: TextStyle(
-                              color: MyColors.darkYellow,
+                              color: primary,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -170,7 +168,7 @@ class _MyClientsState extends State<MyClients> {
                           trailing: Text(
                             "${person['total_amount']} ${getword(context, 'currency')}",
                             style: TextStyle(
-                              color: MyColors.darkYellow,
+                              color: primary,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -193,16 +191,15 @@ class _MyClientsState extends State<MyClients> {
                           onLongPress: () {
                             showModalBottomSheet(
                               context: context,
-                              backgroundColor: MyColors.background,
+                              backgroundColor: background,
                               builder: (context) {
                                 return Column(
                                   children: [
                                     ListTile(
                                       leading: Icon(
                                         Icons.edit,
-                                        color: MyColors.darkYellow,
+                                        color: primary,
                                         size: 30,
-                                        semanticLabel: 'edit_person',
                                       ),
                                       title: Text(
                                         getword(context, 'edit_person'),
@@ -227,7 +224,7 @@ class _MyClientsState extends State<MyClients> {
                                                   controller: editController,
                                                   decoration: InputDecoration(
                                                     border:
-                                                        OutlineInputBorder(),
+                                                        const OutlineInputBorder(),
                                                     hintText: getword(
                                                       context,
                                                       'enter_person_name',
@@ -303,9 +300,10 @@ class _MyClientsState extends State<MyClients> {
                                     ListTile(
                                       leading: Icon(
                                         Icons.delete,
-                                        color: MyColors.darkYellow,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
                                         size: 30,
-                                        semanticLabel: 'delete_person',
                                       ),
                                       title: Text(
                                         getword(context, 'delete_person'),
@@ -353,7 +351,6 @@ class _MyClientsState extends State<MyClients> {
                                                       transaction.reference,
                                                     );
                                                   }
-
                                                   batch.delete(clientDoc);
                                                   await batch.commit();
                                                   if (!context.mounted) return;

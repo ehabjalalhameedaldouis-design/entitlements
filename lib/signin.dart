@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/homepage.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:entitlements/mywidgets/mytextfield.dart';
 import 'package:entitlements/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,14 +30,13 @@ class _SignInScreenState extends State<SignInScreen> {
     try {
       final GoogleSignInAccount account = await GoogleSignIn.instance
           .authenticate();
-
       final GoogleSignInAuthentication authentication = account.authentication;
-      final GoogleSignInClientAuthorization? clientAuth = await account
+      final GoogleSignInClientAuthorization clientAuth = await account
           .authorizationClient
-          .authorizationForScopes(<String>['email', 'profile', 'openid']);
+          .authorizeScopes(<String>['email', 'profile', 'openid']);
 
       final String? idToken = authentication.idToken;
-      final String? accessToken = clientAuth?.accessToken;
+      final String? accessToken = clientAuth.accessToken;
 
       if (idToken == null && accessToken == null) {
         if (!context.mounted) return null;
@@ -66,33 +64,36 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    const Color shadowDark = Color(0xFF0D0E0F);
-    const Color shadowLight = Color(0xFF272A2D);
+    final primary = Theme.of(context).colorScheme.primary;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surface = Theme.of(context).colorScheme.surface;
+    final shadowDark = Colors.black.withValues(alpha: 0.6);
+    final shadowLight = surface.withValues(alpha: 0.5);
 
     return Scaffold(
-      appBar: Myappbar(widget: Text(
-          getword(context,"sign_in"),
+      appBar: Myappbar(
+        widget: Text(
+          getword(context, "sign_in"),
           style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),),
-
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               const SizedBox(height: 5),
               Text(
                 getword(context, 'signin_tagline'),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: MyColors.darkYellow,
+                style: TextStyle(
+                  color: primary,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(height: 8),
-
               MyTextField(
                 label: getword(context, 'email_address'),
                 iconpre: Icons.email_outlined,
@@ -107,7 +108,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 isPassword: true,
                 controller: password,
               ),
-
               Container(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -141,30 +141,31 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     );
                   },
-
                   child: Text(
                     getword(context, 'forgot_password'),
-                    style: TextStyle(color: MyColors.lightBlack, fontSize: 12),
+                    style: TextStyle(color: onSurface, fontSize: 12),
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               GestureDetector(
                 onTap: () async {
                   final email = emailAddress.text.trim();
                   final pass = password.text.trim();
                   if (email.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(getword(context, 'please_enter_email'))),
+                      SnackBar(
+                        content: Text(getword(context, 'please_enter_email')),
+                      ),
                     );
                     return;
                   }
                   if (!email.contains('@')) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(getword(context, 'please_enter_valid_email')),
+                        content: Text(
+                          getword(context, 'please_enter_valid_email'),
+                        ),
                       ),
                     );
                     return;
@@ -172,16 +173,19 @@ class _SignInScreenState extends State<SignInScreen> {
                   if (pass.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(getword(context, 'please_enter_password')),
+                        content: Text(
+                          getword(context, 'please_enter_password'),
+                        ),
                       ),
                     );
                     return;
                   }
                   try {
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                      email: email,
-                      password: pass,
-                    );
+                    final UserCredential creds = await FirebaseAuth.instance
+                        .signInWithEmailAndPassword(
+                          email: email,
+                          password: pass,
+                        );
                     if (!context.mounted) return;
                     await FirebaseAuth.instance.currentUser?.reload();
                     final user = FirebaseAuth.instance.currentUser;
@@ -195,7 +199,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       if (displayName.isNotEmpty) {
                         userData['full_name'] = displayName;
                       }
-
+                      if (creds.additionalUserInfo?.isNewUser ?? false) {
+                        userData['created_at'] = FieldValue.serverTimestamp();
+                      }
                       await FirebaseFirestore.instance
                           .collection('users_accounts')
                           .doc(user.uid)
@@ -210,7 +216,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       await FirebaseAuth.instance.signOut();
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(getword(context, 'verify_before_signin'))),
+                        SnackBar(
+                          content: Text(
+                            getword(context, 'verify_before_signin'),
+                          ),
+                        ),
                       );
                       await user?.sendEmailVerification();
                     }
@@ -229,10 +239,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: MyColors.lightBlack,
+                    color: surface,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      BoxShadow(color: MyColors.darkYellow, blurRadius: 20),
+                      BoxShadow(color: primary, blurRadius: 20),
                       BoxShadow(
                         color: shadowDark,
                         offset: const Offset(6, 6),
@@ -249,7 +259,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Text(
                       getword(context, 'sign_in').toUpperCase(),
                       style: TextStyle(
-                        color: MyColors.darkYellow,
+                        color: primary,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.5,
@@ -258,7 +268,6 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
               GestureDetector(
                 onTap: () async {
@@ -267,7 +276,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     if (cred == null) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(getword(context, 'sign_in_failed'))),
+                        SnackBar(
+                          content: Text(getword(context, 'sign_in_failed')),
+                        ),
                       );
                       return;
                     }
@@ -282,7 +293,6 @@ class _SignInScreenState extends State<SignInScreen> {
                       if (googleDisplayName.isNotEmpty) {
                         googleUserData['full_name'] = googleDisplayName;
                       }
-
                       await FirebaseFirestore.instance
                           .collection('users_accounts')
                           .doc(cred.user!.uid)
@@ -304,10 +314,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: MyColors.lightBlack,
+                    color: surface,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      BoxShadow(color: MyColors.darkYellow, blurRadius: 20),
+                      BoxShadow(color: primary, blurRadius: 20),
                       BoxShadow(
                         color: shadowDark,
                         offset: const Offset(6, 6),
@@ -324,8 +334,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Text(
                       getword(context, 'google_sign_in'),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: MyColors.darkYellow,
+                      style: TextStyle(
+                        color: primary,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.7,
@@ -339,7 +349,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 children: [
                   Text(
                     getword(context, 'dont_have_account'),
-                    style: const TextStyle(color: MyColors.lightBlack, fontSize: 14),
+                    style: TextStyle(color: onSurface, fontSize: 14),
                     textAlign: isArabic ? TextAlign.right : TextAlign.left,
                   ),
                   TextButton(
@@ -352,7 +362,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Text(
                       getword(context, 'sign_up'),
                       style: TextStyle(
-                        color: MyColors.darkYellow,
+                        color: primary,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),

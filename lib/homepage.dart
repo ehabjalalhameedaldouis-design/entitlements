@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entitlements/data/appwords.dart';
+import 'package:entitlements/myaccount.dart';
 import 'package:entitlements/myclients.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
-import 'package:entitlements/mywidgets/mycard.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:entitlements/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Homepage extends StatefulWidget {
@@ -19,9 +18,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  final CollectionReference users = FirebaseFirestore.instance.collection(
-    'users_accounts',
-  );
+  final CollectionReference users = FirebaseFirestore.instance.collection('users_accounts');
   final String uid = FirebaseAuth.instance.currentUser!.uid;
   final ImagePicker _picker = ImagePicker();
   Uint8List? _profileImageBytes;
@@ -60,12 +57,6 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  void _showLatestNotifications() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(getword(context, 'no_new_notifications'))),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final tabs = <Widget>[
@@ -76,10 +67,10 @@ class _HomepageState extends State<Homepage> {
         uid: uid,
         profileImageBytes: _profileImageBytes,
         onTapProfileImage: _pickProfileImage,
-        onShowNotifications: _showLatestNotifications,
         onOpenClients: () => _goToTab(1),
         onOpenAddTransaction: _openAddTransactionSelector,
       ),
+      const MyAccount(),
     ];
 
     return Scaffold(
@@ -98,7 +89,6 @@ class _DashboardBody extends StatelessWidget {
     required this.uid,
     required this.profileImageBytes,
     required this.onTapProfileImage,
-    required this.onShowNotifications,
     required this.onOpenClients,
     required this.onOpenAddTransaction,
   });
@@ -107,24 +97,23 @@ class _DashboardBody extends StatelessWidget {
   final String uid;
   final Uint8List? profileImageBytes;
   final VoidCallback onTapProfileImage;
-  final VoidCallback onShowNotifications;
   final VoidCallback onOpenClients;
   final VoidCallback onOpenAddTransaction;
 
   String _greeting(BuildContext context) {
     final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return getword(context, 'good_morning');
-    }
+    if (hour < 12) return getword(context, 'good_morning');
     return getword(context, 'good_evening');
   }
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     final user = FirebaseAuth.instance.currentUser;
     final displayName = (user?.displayName ?? '').trim();
     final fallbackName = user?.email ?? 'User';
     final name = displayName.isNotEmpty ? displayName : fallbackName;
+
     return StreamBuilder<QuerySnapshot<Object?>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -140,36 +129,27 @@ class _DashboardBody extends StatelessWidget {
                 Text(
                   _greeting(context),
                   style: TextStyle(
-            color: Color(0xFFE9FFF3),
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+                    color: onSurface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
                 Text(
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-            color: Color(0xFFE9FFF3),
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+                    color: onSurface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
               ],
             ),
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      elevation: 8,
-      shadowColor: Colors.black,
-      surfaceTintColor: Colors.transparent,
-            actions: [
-              IconButton(
-                onPressed: onShowNotifications,
-                icon: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: MyColors.darkYellow,
-                ),
-              ),
-            ],
+            elevation: 8,
+            shadowColor: Colors.black,
+            surfaceTintColor: Colors.transparent,
           ),
           body: SafeArea(
             child: ListView(
@@ -198,6 +178,7 @@ class _HeroBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     double total = 0;
     int receivablesCount = 0;
     int payablesCount = 0;
@@ -212,17 +193,16 @@ class _HeroBalanceCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          colors: [Color(0xCC3DA778), Color(0xB32C8D64)],
+        gradient: LinearGradient(
+          colors: [
+            primary.withValues(alpha: 0.8),
+            primary.withValues(alpha: 0.5),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 14, offset: Offset(0, 8)),
         ],
       ),
       child: Column(
@@ -231,14 +211,14 @@ class _HeroBalanceCard extends StatelessWidget {
           Text(
             getword(context, 'allmoney'),
             style: const TextStyle(
-              color: Color(0xFFE9FFF3),
+              color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            total.toStringAsFixed(2),
+            '${total.toStringAsFixed(2)} ${getword(context, 'currency')}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -314,34 +294,33 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
         height: 82,
         decoration: BoxDecoration(
-          color: const Color(0x991F6E4F),
+          color: surface,
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
+            BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
           ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFFCEFFE5)),
+            Icon(icon, color: primary),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFFE9FFF3),
+                style: TextStyle(
+                  color: primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -355,13 +334,14 @@ class _QuickActionCard extends StatelessWidget {
 
 class _RecentTransactionsCard extends StatelessWidget {
   const _RecentTransactionsCard({required this.uid});
-
   final String uid;
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+
     return Card(
-      color: const Color(0x991F6E4F),
+      color: surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -372,6 +352,8 @@ class _RecentTransactionsCard extends StatelessWidget {
             .limit(6)
             .snapshots(),
         builder: (context, snapshot) {
+          final primary = Theme.of(context).colorScheme.primary;
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
               padding: EdgeInsets.all(16),
@@ -383,7 +365,7 @@ class _RecentTransactionsCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 getword(context, 'no_transactions_yet'),
-                style: const TextStyle(color: Color(0xFFE9FFF3)),
+                style: TextStyle(color: primary),
               ),
             );
           }
@@ -394,7 +376,7 @@ class _RecentTransactionsCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 getword(context, 'no_transactions_yet'),
-                style: const TextStyle(color: Color(0xFFE9FFF3)),
+                style: TextStyle(color: primary),
               ),
             );
           }
@@ -404,16 +386,10 @@ class _RecentTransactionsCard extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(
-                    Icons.receipt_long,
-                    color: Color(0xFFCEFFE5),
-                  ),
+                  leading: Icon(Icons.receipt_long, color: primary),
                   title: Text(
                     getword(context, 'recent_transactions'),
-                    style: const TextStyle(
-                      color: Color(0xFFE9FFF3),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: primary, fontWeight: FontWeight.bold),
                   ),
                 ),
                 ...currentUserTransactions.map((txDoc) {
@@ -422,9 +398,7 @@ class _RecentTransactionsCard extends StatelessWidget {
                   final double amount = (tx['amount'] as num?)?.toDouble() ?? 0;
                   final Timestamp? ts = tx['time'] as Timestamp?;
                   final DateTime? time = ts?.toDate();
-                  final String description = (tx['description'] ?? '')
-                      .toString();
-
+                  final String description = (tx['description'] ?? '').toString();
                   final Color color = isDebt
                       ? const Color.fromARGB(255, 220, 55, 55)
                       : const Color.fromARGB(255, 56, 196, 121);
@@ -440,21 +414,15 @@ class _RecentTransactionsCard extends StatelessWidget {
                     ),
                     title: Text(
                       description,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(color: color, fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
                       dateText,
                       style: TextStyle(color: color.withValues(alpha: 0.8)),
                     ),
                     trailing: Text(
-                      amount.toStringAsFixed(2),
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      '${amount.toStringAsFixed(2)} ${getword(context, 'currency')}',
+                      style: TextStyle(color: color, fontWeight: FontWeight.bold),
                     ),
                   );
                 }),
@@ -514,10 +482,12 @@ class _HomeBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xE60A2A1E),
-        border: Border(top: BorderSide(color: Color(0x991F6E4F), width: 1)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(top: BorderSide(color: surface, width: 1)),
       ),
       padding: const EdgeInsets.only(bottom: 8, top: 6),
       child: SafeArea(
@@ -543,6 +513,12 @@ class _HomeBottomBar extends StatelessWidget {
               selected: currentIndex == 2,
               onTap: () => onTap(2),
             ),
+            _BottomItem(
+              label: getword(context, 'my_account'),
+              icon: Icons.person_rounded,
+              selected: currentIndex == 3,
+              onTap: () => onTap(3),
+            ),
           ],
         ),
       ),
@@ -565,9 +541,9 @@ class _BottomItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = selected
-        ? const Color(0xFF19E26A)
-        : const Color(0xFFB6E8CF);
+    final primary = Theme.of(context).colorScheme.primary;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final color = selected ? primary : onSurface.withValues(alpha: 0.5);
 
     return InkWell(
       borderRadius: BorderRadius.circular(10),

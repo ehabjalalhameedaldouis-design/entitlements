@@ -1,5 +1,4 @@
 import 'package:entitlements/data/appwords.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 
 class Mycard extends StatelessWidget {
@@ -10,23 +9,26 @@ class Mycard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+
     return Card(
-              color: MyColors.lightBlack,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ListTile(
-                leading: Icon(icon, color: MyColors.darkYellow),
-                title: Text(
-                  getword(context, label),
-                  style: TextStyle(
-                    color: MyColors.darkYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: onTap,
-              ),
-            );
+      color: surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: primary),
+        title: Text(
+          getword(context, label),
+          style: TextStyle(
+            color: primary,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onTap: onTap,
+      ),
+    );
   }
 }

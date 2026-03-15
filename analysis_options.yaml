@@ -4,3 +4,4 @@ analyzer:
     unused_import: ignore
     deprecated_member_use: ignore
     avoid_print: ignore
+    unnecessary_nullable_for_final_variable_declarations: ignore

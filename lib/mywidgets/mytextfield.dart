@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 
 class MyTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String label;
   final String hintText;
   final IconData? iconsuf;
-  final IconData? iconpre;  
+  final IconData? iconpre;
   final Function(String)? onChanged;
   final bool isPassword;
   const MyTextField({
@@ -22,13 +21,16 @@ class MyTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: MyColors.darkYellow,
+          style: TextStyle(
+            color: primary,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -37,21 +39,20 @@ class MyTextField extends StatelessWidget {
         TextField(
           controller: controller,
           obscureText: isPassword,
-          cursorColor: MyColors.darkYellow,
-          style: TextStyle(color: MyColors.darkYellow),
+          cursorColor: primary,
+          style: TextStyle(color: primary),
           decoration: InputDecoration(
-            fillColor: MyColors.lightBlack,
+            fillColor: surface,
             filled: true,
-            suffixIcon: iconsuf != null ? Icon(iconsuf, color: MyColors.darkYellow) : null,
-            prefixIcon: iconpre != null ? Icon(iconpre, color: MyColors.darkYellow) : null,
+            suffixIcon: iconsuf != null ? Icon(iconsuf, color: primary) : null,
+            prefixIcon: iconpre != null ? Icon(iconpre, color: primary) : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: MyColors.darkYellow),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              hintText: hintText,
-            hintStyle: TextStyle(color: MyColors.darkYellow),
-            focusColor: MyColors.darkYellow,  
+              borderSide: BorderSide(color: primary),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            hintText: hintText,
+            hintStyle: TextStyle(color: primary.withValues(alpha: 0.6)),
           ),
           onChanged: onChanged,
         ),

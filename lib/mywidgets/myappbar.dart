@@ -1,5 +1,4 @@
 import 'package:entitlements/data/appwords.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
 import 'package:flutter/material.dart';
 
 class Myappbar extends StatelessWidget implements PreferredSizeWidget {
@@ -16,7 +15,7 @@ class Myappbar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       elevation: 8,
-      shadowColor: Colors.black,
+      shadowColor: Theme.of(context).shadowColor,
       surfaceTintColor: Colors.transparent,
     );
   }

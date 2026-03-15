@@ -1,10 +1,9 @@
 import 'package:entitlements/data/appwords.dart';
 import 'package:entitlements/main.dart';
 import 'package:entitlements/mywidgets/myappbar.dart';
-import 'package:entitlements/mywidgets/mycolors.dart';
-import 'package:entitlements/signin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});
@@ -21,7 +20,7 @@ class _SettingState extends State<Setting> {
         duration: const Duration(seconds: 2),
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: MyColors.darkYellow),
+            Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 10),
             Expanded(child: Text(message)),
           ],
@@ -30,8 +29,11 @@ class _SettingState extends State<Setting> {
     );
   }
 
-  void _changeLanguage(String code) {
+  Future<void> _changeLanguage(String code, BuildContext context) async {
     if (code == Localizations.localeOf(context).languageCode) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', code);
+    if (!context.mounted) return;
     if (code == 'ar') {
       DebtManager.setLocale(context, const Locale('ar', 'SA'));
       _showLanguageSnack(getword(context, 'language_changed_to_arabic'));
@@ -43,6 +45,7 @@ class _SettingState extends State<Setting> {
 
   void _showLanguagePickerSnack() {
     final currentLang = Localizations.localeOf(context).languageCode;
+    final primary = Theme.of(context).colorScheme.primary;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 8),
@@ -62,13 +65,13 @@ class _SettingState extends State<Setting> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      _changeLanguage('ar');
+                      _changeLanguage('ar', context);
                     },
                     icon: Icon(
                       currentLang == 'ar'
                           ? Icons.radio_button_checked
                           : Icons.radio_button_off,
-                      color: MyColors.darkYellow,
+                      color: primary,
                     ),
                     label: Text(getword(context, 'arabic_language')),
                   ),
@@ -78,13 +81,13 @@ class _SettingState extends State<Setting> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      _changeLanguage('en');
+                      _changeLanguage('en', context);
                     },
                     icon: Icon(
                       currentLang == 'en'
                           ? Icons.radio_button_checked
                           : Icons.radio_button_off,
-                      color: MyColors.darkYellow,
+                      color: primary,
                     ),
                     label: Text(getword(context, 'english_language')),
                   ),
@@ -99,11 +102,17 @@ class _SettingState extends State<Setting> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
-      appBar: Myappbar(widget: Text(
-          getword(context,"settings"),
+      appBar: Myappbar(
+        widget: Text(
+          getword(context, "settings"),
           style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(14),
         children: [
@@ -113,60 +122,119 @@ class _SettingState extends State<Setting> {
               borderRadius: BorderRadius.circular(14),
               onTap: _showLanguagePickerSnack,
               child: Ink(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: MyColors.lightBlack,
+                  color: surface,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.language, color: MyColors.darkYellow),
+                    Icon(Icons.language, color: primary),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         getword(context, 'choose_language'),
-                        style: const TextStyle(
-                          color: MyColors.title,
+                        style: TextStyle(
+                          color: onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 16, color: onSurface),
                   ],
                 ),
               ),
             ),
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            height: 50,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF245F48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                if (!context.mounted) return;
-                Navigator.pushAndRemoveUntil(
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                DebtManager.setTheme(
                   context,
-                  MaterialPageRoute(builder: (context) => const SignInScreen()),
-                  (route) => false,
+                  isDark ? ThemeMode.light : ThemeMode.dark,
                 );
               },
-              icon: const Icon(Icons.logout_rounded, color: Color(0xFFE9FFF3)),
-              label: Text(
-                getword(context, 'sign_out'),
-                style: const TextStyle(
-                  color: Color(0xFFE9FFF3),
-                  fontWeight: FontWeight.w700,
+              child: Ink(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      color: primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? getword(context, 'dark_mode')
+                            : getword(context, 'light_mode'),
+                        style: TextStyle(
+                          color: onSurface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 16, color: onSurface),
+                  ],
                 ),
               ),
             ),
           ),
+          const SizedBox(height: 14),
+Material(
+  color: Colors.transparent,
+  child: InkWell(
+    borderRadius: BorderRadius.circular(14),
+    onTap: () async {
+      final Uri url = Uri.parse('https://wa.me/967717471102');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    },
+    child: Ink(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.chat_rounded, color: primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              getword(context, 'contact_developer'),
+              style: TextStyle(
+                color: onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Icon(Icons.arrow_forward_ios_rounded, size: 16, color: onSurface),
+        ],
+      ),
+    ),
+  ),
+),
         ],
       ),
     );
