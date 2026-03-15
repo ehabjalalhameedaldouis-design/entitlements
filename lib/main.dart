@@ -75,7 +75,7 @@ class _DebtManagerState extends State<DebtManager> {
   final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     colorScheme: const ColorScheme.light(
-      primary: Color(0xFFE8F5E9),
+      primary: Color(0xFF1B8C4E),
       secondary: Color(0xFF1B8C4E),
       surface: Color(0xFFE8F5E9),
       error: Color(0xFFD32F2F),
