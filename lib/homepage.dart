@@ -6,9 +6,7 @@ import 'package:entitlements/mywidgets/myappbar.dart';
 import 'package:entitlements/persondetailes.dart';
 import 'package:entitlements/settings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -20,29 +18,8 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   final CollectionReference users = FirebaseFirestore.instance.collection('users_accounts');
   final String uid = FirebaseAuth.instance.currentUser!.uid;
-  final ImagePicker _picker = ImagePicker();
-  Uint8List? _profileImageBytes;
+  
   int _tabIndex = 2;
-
-  Future<void> _pickProfileImage() async {
-    try {
-      final XFile? pickedImage = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-      if (pickedImage == null) return;
-      final Uint8List bytes = await pickedImage.readAsBytes();
-      if (!mounted) return;
-      setState(() {
-        _profileImageBytes = bytes;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(getword(context, 'failed_pick_image'))),
-      );
-    }
-  }
 
   void _goToTab(int index) {
     setState(() {
@@ -65,8 +42,6 @@ class _HomepageState extends State<Homepage> {
       _DashboardBody(
         stream: users.doc(uid).collection('My_Clients').snapshots(),
         uid: uid,
-        profileImageBytes: _profileImageBytes,
-        onTapProfileImage: _pickProfileImage,
         onOpenClients: () => _goToTab(1),
         onOpenAddTransaction: _openAddTransactionSelector,
       ),
@@ -87,16 +62,12 @@ class _DashboardBody extends StatelessWidget {
   const _DashboardBody({
     required this.stream,
     required this.uid,
-    required this.profileImageBytes,
-    required this.onTapProfileImage,
     required this.onOpenClients,
     required this.onOpenAddTransaction,
   });
 
   final Stream<QuerySnapshot<Object?>> stream;
   final String uid;
-  final Uint8List? profileImageBytes;
-  final VoidCallback onTapProfileImage;
   final VoidCallback onOpenClients;
   final VoidCallback onOpenAddTransaction;
 

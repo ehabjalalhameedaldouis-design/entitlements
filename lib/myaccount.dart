@@ -13,15 +13,15 @@ class MyAccount extends StatefulWidget {
 }
 
 class _MyAccountState extends State<MyAccount> {
-  final User? user = FirebaseAuth.instance.currentUser;
+  User? get user => FirebaseAuth.instance.currentUser;
 
   bool get _isGoogleUser =>
       user?.providerData.any((p) => p.providerId == 'google.com') ?? false;
 
   void _showGoogleMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _editName(BuildContext context) async {
@@ -93,7 +93,9 @@ class _MyAccountState extends State<MyAccount> {
               final newPassword = controller.text.trim();
               if (newPassword.length < 6) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(getword(context, 'password_too_short'))),
+                  SnackBar(
+                    content: Text(getword(context, 'password_too_short')),
+                  ),
                 );
                 return;
               }
@@ -106,9 +108,9 @@ class _MyAccountState extends State<MyAccount> {
                 );
               } on FirebaseAuthException catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.message ?? '')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(e.message ?? '')));
               }
             },
             child: Text(getword(context, 'save')),
@@ -146,7 +148,9 @@ class _MyAccountState extends State<MyAccount> {
               final newEmail = controller.text.trim();
               if (!newEmail.contains('@')) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(getword(context, 'please_enter_valid_email'))),
+                  SnackBar(
+                    content: Text(getword(context, 'please_enter_valid_email')),
+                  ),
                 );
                 return;
               }
@@ -155,13 +159,15 @@ class _MyAccountState extends State<MyAccount> {
                 if (!context.mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(getword(context, 'email_verification_sent'))),
+                  SnackBar(
+                    content: Text(getword(context, 'email_verification_sent')),
+                  ),
                 );
               } on FirebaseAuthException catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.message ?? '')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(e.message ?? '')));
               }
             },
             child: Text(getword(context, 'save')),
@@ -202,7 +208,9 @@ class _MyAccountState extends State<MyAccount> {
       // 1. احذف كل transactions لكل client
       final clients = await userDoc.collection('My_Clients').get();
       for (final client in clients.docs) {
-        final transactions = await client.reference.collection('transactions').get();
+        final transactions = await client.reference
+            .collection('transactions')
+            .get();
         for (final tx in transactions.docs) {
           await tx.reference.delete();
         }
@@ -229,9 +237,9 @@ class _MyAccountState extends State<MyAccount> {
       );
     } on FirebaseAuthException catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? '')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? '')));
     }
   }
 
@@ -243,7 +251,9 @@ class _MyAccountState extends State<MyAccount> {
     final createdAtText = createdAt != null
         ? '${createdAt.day}/${createdAt.month}/${createdAt.year}'
         : '—';
-    final providerText = _isGoogleUser ? 'Google' : getword(context, 'email_address');
+    final providerText = _isGoogleUser
+        ? 'Google'
+        : getword(context, 'email_address');
 
     return Scaffold(
       appBar: Myappbar(
@@ -255,14 +265,42 @@ class _MyAccountState extends State<MyAccount> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _InfoCard(icon: Icons.person_outline, label: getword(context, 'full_name'), value: user?.displayName ?? '—'),
-          _InfoCard(icon: Icons.email_outlined, label: getword(context, 'email_address'), value: user?.email ?? '—'),
-          _InfoCard(icon: Icons.login_rounded, label: getword(context, 'login_method'), value: providerText),
-          _InfoCard(icon: Icons.calendar_today_outlined, label: getword(context, 'account_created_at'), value: createdAtText),
+          _InfoCard(
+            icon: Icons.person_outline,
+            label: getword(context, 'full_name'),
+            value: user?.displayName ?? '—',
+          ),
+          _InfoCard(
+            icon: Icons.email_outlined,
+            label: getword(context, 'email_address'),
+            value: user?.email ?? '—',
+          ),
+          _InfoCard(
+            icon: Icons.login_rounded,
+            label: getword(context, 'login_method'),
+            value: providerText,
+          ),
+          _InfoCard(
+            icon: Icons.calendar_today_outlined,
+            label: getword(context, 'account_created_at'),
+            value: createdAtText,
+          ),
           const SizedBox(height: 20),
-          _ActionButton(icon: Icons.drive_file_rename_outline, label: getword(context, 'edit_name'), onTap: () => _editName(context)),
-          _ActionButton(icon: Icons.lock_outline, label: getword(context, 'change_password'), onTap: () => _changePassword(context)),
-          _ActionButton(icon: Icons.alternate_email, label: getword(context, 'change_email'), onTap: () => _changeEmail(context)),
+          _ActionButton(
+            icon: Icons.drive_file_rename_outline,
+            label: getword(context, 'edit_name'),
+            onTap: () => _editName(context),
+          ),
+          _ActionButton(
+            icon: Icons.lock_outline,
+            label: getword(context, 'change_password'),
+            onTap: () => _changePassword(context),
+          ),
+          _ActionButton(
+            icon: Icons.alternate_email,
+            label: getword(context, 'change_email'),
+            onTap: () => _changeEmail(context),
+          ),
           const SizedBox(height: 20),
           _ActionButton(
             icon: Icons.logout_rounded,
@@ -291,7 +329,11 @@ class _MyAccountState extends State<MyAccount> {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.icon, required this.label, required this.value});
+  const _InfoCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
   final IconData icon;
   final String label;
   final String value;
@@ -319,12 +361,19 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(color: onSurface.withValues(alpha: 0.7), fontSize: 12),
+                  style: TextStyle(
+                    color: onSurface.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(color: onSurface, fontSize: 15, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: onSurface,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
