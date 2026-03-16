@@ -33,3 +33,4 @@ android/app/google-services.json
 android/key.properties
 *.jks
 *.keystore
+lib/firebase_options.dart
