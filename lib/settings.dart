@@ -45,7 +45,7 @@ class _SettingState extends State<Setting> {
 
   void _showLanguagePickerSnack() {
     final currentLang = Localizations.localeOf(context).languageCode;
-    final primary = Theme.of(context).colorScheme.primary;
+    final primary = Theme.of(context).colorScheme.onPrimary;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 8),
@@ -73,7 +73,7 @@ class _SettingState extends State<Setting> {
                           : Icons.radio_button_off,
                       color: primary,
                     ),
-                    label: Text(getword(context, 'arabic_language')),
+                    label: Text(getword(context, 'arabic_language'), style: TextStyle(color: primary)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -89,7 +89,7 @@ class _SettingState extends State<Setting> {
                           : Icons.radio_button_off,
                       color: primary,
                     ),
-                    label: Text(getword(context, 'english_language')),
+                    label: Text(getword(context, 'english_language'), style: TextStyle(color: primary)),
                   ),
                 ),
               ],
